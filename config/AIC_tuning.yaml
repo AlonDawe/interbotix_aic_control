@@ -1,0 +1,7 @@
+var_mu: 10.0
+var_muprime: 20.0
+var_q: 1.0
+var_qdot: 1.0
+
+k_a: 100.0
+k_mu : 100.0

@@ -1,0 +1,18 @@
+var_mu: 10.0
+var_muprime: 20.0
+var_q: 10.0
+var_qdot: 10.0
+
+k_a: 400.0
+k_mu : 10.0
+
+k_d : 60.0
+k_i : 0.001
+
+k_p0 : 50
+k_p1 : 50
+k_p2 : 50
+k_p3 : 50
+k_p4 : 100
+
+max_i : 200

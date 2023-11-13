@@ -125,6 +125,7 @@ include_directories(
 add_library(${PROJECT_NAME}
   src/classes/AIC.cpp
   src/classes/uAIC.cpp
+  src/classes/ReAIC.cpp
 )
 
 ## Declare a C++ library
@@ -155,6 +156,12 @@ add_library(${PROJECT_NAME}
 add_executable(${PROJECT_NAME}_AIC_node src/AIC_controller.cpp)
 add_dependencies(${PROJECT_NAME}_AIC_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_AIC_node
+   ${catkin_LIBRARIES} ${PROJECT_NAME}
+)
+
+add_executable(${PROJECT_NAME}_ReAIC_node src/ReAIC_controller.cpp)
+add_dependencies(${PROJECT_NAME}_ReAIC_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_ReAIC_node
    ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 

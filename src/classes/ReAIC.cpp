@@ -9,10 +9,10 @@
  *
  */
 
-#include "AIC.h"
+#include "ReAIC.h"
 
   // Constructor which takes as argument the publishers and initialises the private ones in the class
-  AIC::AIC(int whichRobot){
+  ReAIC::ReAIC(int whichRobot){
 
       // Initialize publishers on the topics /robot1/panda_joint*_controller/command for the joint efforts
       groupPub = nh.advertise<interbotix_xs_msgs::JointGroupCommand>("/px150/commands/joint_group", 20);
@@ -27,7 +27,7 @@
       
       //tauPub6 = nh.advertise<std_msgs::Float64>("/px150/Left_finger_controller/command", 20);
       //tauPub7 = nh.advertise<std_msgs::Float64>("/px150/right_finger_controller/command", 20);
-      sensorSub = nh.subscribe("/px150/joint_states", 1, &AIC::jointStatesCallback, this);
+      sensorSub = nh.subscribe("/px150/joint_states", 1, &ReAIC::jointStatesCallback, this);
       // Publisher for the free-energy and sensory prediction errors
       IFE_pub = nh.advertise<std_msgs::Float64>("px150_free_energy", 10);
       SPE_pub = nh.advertise<std_msgs::Float64MultiArray>("px150_SPE", 10);
@@ -38,11 +38,11 @@
       beliefs_mu_pp_pub = nh.advertise<std_msgs::Float64MultiArray>("beliefs_mu_pp", 10);
 
     // Initialize the variables for thr AIC
-    AIC::initVariables();
+    ReAIC::initVariables();
   }
-  AIC::~AIC(){}
+  ReAIC::~ReAIC(){}
 
-  void   AIC::jointStatesCallback(const sensor_msgs::JointState::ConstPtr& msg)
+  void   ReAIC::jointStatesCallback(const sensor_msgs::JointState::ConstPtr& msg)
   {
     //Gazebo Setup
     //jointPos(0) = msg->position[6];
@@ -73,7 +73,7 @@
     }
   }
 
-  void   AIC::initVariables(){
+  void   ReAIC::initVariables(){
 
     // Support variable
     dataReceived = 0;
@@ -92,6 +92,8 @@
     // Precision matrices (first set them to zero then populate the diagonal)
     SigmaP_yq0 = Eigen::Matrix<double, 5, 5>::Zero();
     SigmaP_yq1 = Eigen::Matrix<double, 5, 5>::Zero();
+    SigmaP_yq0_d = Eigen::Matrix<double, 5, 5>::Zero();
+    SigmaP_yq1_d = Eigen::Matrix<double, 5, 5>::Zero();
     SigmaP_mu = Eigen::Matrix<double, 5, 5>::Zero();
     SigmaP_muprime = Eigen::Matrix<double, 5, 5>::Zero();
 
@@ -104,15 +106,25 @@
     nh.getParam("var_muprime", var_muprime);
     nh.getParam("var_q", var_q);
     nh.getParam("var_qdot", var_qdot);
+    nh.getParam("var_q_d", var_q_d);
+    nh.getParam("var_qdot_d", var_qdot_d);
     nh.getParam("k_mu", k_mu);
     nh.getParam("k_a", k_a);
 
     for( int i = 0; i < SigmaP_yq0.rows(); i = i + 1 ) {
       SigmaP_yq0(i,i) = 1/var_q;
       SigmaP_yq1(i,i) = 1/var_qdot;
+      SigmaP_yq0_d(i,i) = 1/var_q_d;
+      SigmaP_yq1_d(i,i) = 1/var_qdot_d;
       SigmaP_mu(i,i) = 1/var_mu;
       SigmaP_muprime(i,i) = 1/var_muprime;
       k_a_adapt(i, i) = k_a;
+
+      mu(i) = 0.0;
+      mu_p(i) = 0.0;
+
+      mu_d(i) = 0.0;
+      mu_p_d(i) = 0.0;
     }
 
     // Initialize control actions
@@ -124,6 +136,8 @@
     // Integration step
     h = 0.01;
 
+    
+
     // Resize Float64MultiArray messages
     AIC_mu.data.resize(5);
     AIC_mu_p.data.resize(5);
@@ -131,7 +145,7 @@
     SPE.data.resize(2);
   }
 
-  void AIC::minimiseF(){
+  void ReAIC::minimiseF(){
 
     // Compute single sensory prediction errors
     SPEq = (jointPos.transpose()-mu.transpose())*SigmaP_yq0*(jointPos-mu);
@@ -143,8 +157,8 @@
     F.data = SPEq + SPEdq + SPEmu_p + SPEmu_pp;
 
     // Free-energy minimization using gradient descent and beliefs update
-    mu_dot = mu_p - k_mu*(-SigmaP_yq0*(jointPos-mu)+SigmaP_mu*(mu_p+mu-mu_d));
-    mu_dot_p = mu_pp - k_mu*(-SigmaP_yq1*(jointVel-mu_p)+SigmaP_mu*(mu_p+mu-mu_d)+SigmaP_muprime*(mu_pp+mu_p));
+    mu_dot = mu_p - k_mu*(-SigmaP_yq0*(jointPos-mu) + SigmaP_yq0_d*(mu-mu_d) +SigmaP_mu*(mu_p+mu-mu_d));
+    mu_dot_p = mu_pp - k_mu*(-SigmaP_yq1*(jointVel-mu_p) + SigmaP_yq1_d*(mu_p - mu_p_d) +SigmaP_mu*(mu_p+mu-mu_d)+SigmaP_muprime*(mu_pp+mu_p));
     mu_dot_pp = - k_mu*(SigmaP_muprime*(mu_pp+mu_p));
 
     // Belifs update
@@ -163,7 +177,7 @@
     SPE.data[1] = SPEdq;
 
     // Calculate and send control actions
-    AIC::computeActions();
+    ReAIC::computeActions();
 
     // Publish free-energy
     IFE_pub.publish(F);
@@ -177,12 +191,19 @@
     beliefs_mu_pp_pub.publish(AIC_mu_pp);
   }
 
-  void   AIC::computeActions(){
-    AIC::adjust_learning_rate();
+  void   ReAIC::computeActions(){
+    ReAIC::adjust_learning_rate();
     // Compute control actions through gradient descent of F
     for (int i=0;i<1;i++){
       u = u-300*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu));
     }
+
+    if (u(0) > 885.0) {
+        u(0) = 885.0;
+    } else if (u(0) < -885.0) {
+        u(0) = -885.0;
+    }
+
     ROS_INFO_STREAM("Sending random velocity command:"
       << " u= " << u(0) << " " << u(1) << " " << u(2) << " " << u(3) << " " << u(4));
     
@@ -212,6 +233,8 @@
 
     waist_msg.name = "waist";
     waist_msg.cmd = u(0);
+
+    
 
     shoulder_msg.name = "shoulder";
     shoulder_msg.cmd = u(1);
@@ -257,7 +280,7 @@
     //tauPub7.publish(tau7);
   }
 
-  int AIC::dataReady(){
+  int ReAIC::dataReady(){
     // Method to control if the joint states have been received already,
     // used in the main function
     if(dataReceived==1)
@@ -266,17 +289,18 @@
       return 0;
   }
 
-  void AIC::setGoal(std::vector<double> desiredPos){
+  void ReAIC::setGoal(std::vector<double> desiredPos){
     for(int i=0; i<desiredPos.size(); i++){
       mu_d(i) = desiredPos[i];
+      mu_p_d(i) = 0.0;
     }
   }
 
-  std_msgs::Float64MultiArray  AIC::getSPE(){
+  std_msgs::Float64MultiArray  ReAIC::getSPE(){
     return(SPE);
   }
 
-  void AIC::adjust_learning_rate() {
+  void ReAIC::adjust_learning_rate() {
     error = (jointPos - mu_d).cwiseAbs();
     
     for (int i = 0; i < 5; ++i) {

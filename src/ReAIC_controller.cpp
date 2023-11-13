@@ -15,14 +15,14 @@
  *
  */
 
-#include "AIC.h"
+#include "ReAIC.h"
 
 // Constant for class AIC constructor to define which robot to control
 const int robot = 1;
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "aic_control_node");
+  ros::init(argc, argv, "Reaic_control_node");
   // Variables to regulate the flow (Force to read once every 1ms the sensors)
   int count = 0;
   int cycles = 0;
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
   //desiredPos3[5] = 0.0;
 
   // Object of the class AIC which will take care of everything
-  AIC AIC_controller(robot);
+  ReAIC ReAIC_controller(robot);
   // Set desired position in the AIC class
   ros::Rate rate(100);
   while (count<100){
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     rate.sleep();
   }
 
-  AIC_controller.setGoal(desiredPos1);
+  ReAIC_controller.setGoal(desiredPos1);
 
   // Main loop
   
@@ -72,23 +72,23 @@ int main(int argc, char **argv)
     ros::spinOnce();
 
     // Skip only first cycle to allow reading the sensory input first
-    if ((count!=0)&&(AIC_controller.dataReady()==1)){
-      AIC_controller.minimiseF();
+    if ((count!=0)&&(ReAIC_controller.dataReady()==1)){
+      ReAIC_controller.minimiseF();
       cycles ++;
       if (cycles == 600){
-        AIC_controller.setGoal(desiredPos2);
+        ReAIC_controller.setGoal(desiredPos2);
       }
 
       if (cycles == 1200){
-        AIC_controller.setGoal(desiredPos1);
+        ReAIC_controller.setGoal(desiredPos1);
       }
 
       if (cycles == 1800){
-        AIC_controller.setGoal(desiredPos3);
+        ReAIC_controller.setGoal(desiredPos3);
       }
 
       if (cycles == 2400){
-        AIC_controller.setGoal(desiredPos1);
+        ReAIC_controller.setGoal(desiredPos1);
         cycles = 0;
       }
     }

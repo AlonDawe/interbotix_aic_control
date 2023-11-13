@@ -13,8 +13,8 @@
  *
  */
 
-#ifndef AIC_H
-#define AIC_H
+#ifndef ReAIC_H
+#define ReAIC_H
 #define _USE_MATH_DEFINES
 
 #include "ros/ros.h"
@@ -31,12 +31,12 @@
 #include <interbotix_xs_msgs/JointSingleCommand.h>
 
 // Class AIC to hanle the subscribers and the publishers for the active inference controller
-class AIC
+class ReAIC
 {
 public:
   // Constructor and destructor
-  AIC(int whichRobot);
-  ~AIC();
+  ReAIC(int whichRobot);
+  ~ReAIC();
 
   // Callback to handle the proprioceptive sensory data from the topic /joint_states published at 1kHz
   void jointStatesCallback(const sensor_msgs::JointState::ConstPtr& msg);
@@ -53,18 +53,18 @@ public:
   // get methods for sensory prediction errors
   std_msgs::Float64MultiArray getSPE();
 
-  void adjust_learning_rate();
+  void adjust_learning_rate(); 
 
 private:
 
   // Variances associated with the active inference controller and the confidence relative to sensory input and beliefs
-  double var_q, var_qdot, var_mu, var_muprime;
+  double var_q, var_qdot, var_mu, var_muprime, var_q_d, var_qdot_d;
   // Precision matrices, diagonal matrices with the inverce of the variance
-  Eigen::Matrix<double, 5, 5> SigmaP_yq0, SigmaP_yq1, SigmaP_mu, SigmaP_muprime, k_a_adapt;
+  Eigen::Matrix<double, 5, 5> SigmaP_yq0, SigmaP_yq1, SigmaP_mu, SigmaP_muprime, SigmaP_yq0_d, SigmaP_yq1_d, k_a_adapt;
   // Beliefs about the states and their derivatives mu, mu', mu'', column vectors of 7 elements
   Eigen::Matrix<double, 5, 1> mu, mu_p, mu_pp, mu_dot, mu_dot_p, mu_dot_pp, jointPos, jointVel;
   // Desired robot's states, column vector of 7 elements
-  Eigen::Matrix<double, 5, 1> mu_d, error;
+  Eigen::Matrix<double, 5, 1> mu_d, mu_p_d, error;
   // Control actions,  column vector of 7 elements
   Eigen::Matrix<double, 5, 1> u;
   // Learning rates and integration step for the AIC

@@ -55,6 +55,8 @@ public:
 
   void adjust_learning_rate();
 
+  void setStep(std::vector<double> controlInput);
+
 private:
 
   // Variances associated with the active inference controller and the confidence relative to sensory input and beliefs

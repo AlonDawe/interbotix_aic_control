@@ -45,24 +45,24 @@
   void   AIC::jointStatesCallback(const sensor_msgs::JointState::ConstPtr& msg)
   {
     //Gazebo Setup
-    //jointPos(0) = msg->position[6];
-    //jointVel(0) = msg->velocity[6];
-    //jointPos(1) = msg->position[5];
-    //jointVel(1) = msg->velocity[5];
-    //jointPos(2) = msg->position[0];
-    //jointVel(2) = msg->velocity[0];
-    //jointPos(3) = msg->position[1];
-    //jointVel(3) = msg->velocity[1];
-    //jointPos(4) = msg->position[7];
-    //jointVel(4) = msg->velocity[7];
+    jointPos(0) = msg->position[5];
+    jointVel(0) = msg->velocity[5];
+    jointPos(1) = msg->position[4];
+    jointVel(1) = msg->velocity[4];
+    jointPos(2) = msg->position[0];
+    jointVel(2) = msg->velocity[0];
+    jointPos(3) = msg->position[6];
+    jointVel(3) = msg->velocity[6];
+    jointPos(4) = msg->position[7];
+    jointVel(4) = msg->velocity[7];
     //jointPos(5) = msg->position[8];
     //jointVel(5) = msg->velocity[8];
 
     // Save joint values
-    for( int i = 0; i < 5; i++ ) {
-      jointPos(i) = msg->position[i];
-      jointVel(i) = msg->velocity[i];
-    }
+    //for( int i = 0; i < 5; i++ ) {
+    //  jointPos(i) = msg->position[i];
+    //  jointVel(i) = msg->velocity[i];
+    //}
     // If this is the first time we read the joint states then we set the current beliefs
     if (dataReceived == 0){
       // Track the fact that the encoders published
@@ -181,12 +181,27 @@
     AIC::adjust_learning_rate();
     // Compute control actions through gradient descent of F
     for (int i=0;i<1;i++){
-      u = u-300*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu));
+      //u = u-300*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu));
+      u = u-h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu));
     }
     ROS_INFO_STREAM("Sending random velocity command:"
       << " u= " << u(0) << " " << u(1) << " " << u(2) << " " << u(3) << " " << u(4));
     
     interbotix_xs_msgs::JointGroupCommand a;
+    a.name = "arm";
+    //std::cout << "Values of u:" << std::endl;
+    //for (int i = 0; i < u.rows(); ++i) {
+    //    std::cout << "u(" << i << ") = " << u(i) << std::endl;
+    //}
+    //Eigen::Map<Eigen::Matrix<float, 5, 1>> u_float(a.cmd.data());
+    //u_float = u.cast<float>();
+
+    //float32 u0 = u(0);
+    //float32 u1 = u(1);
+    //float32 u2 = u(2);
+    //float32 u3 = u(3);
+    //float32 u4 = u(4);
+    //a.cmd = {u[0], u[1], u[2], u[3], u[4]};
 
     interbotix_xs_msgs::JointSingleCommand waist_msg;
     interbotix_xs_msgs::JointSingleCommand shoulder_msg;
@@ -196,12 +211,12 @@
     interbotix_xs_msgs::JointSingleCommand wrist_rot_msg;
 
 
-    a.name = "arm";
-    a.cmd.push_back(u(0));
-    a.cmd.push_back(u(1));
-    a.cmd.push_back(u(2));
-    a.cmd.push_back(u(3));
-    a.cmd.push_back(u(4));
+    //a.name = "arm";
+    //a.cmd.push_back(u(0));
+    //a.cmd.push_back(u(1));
+    //a.cmd.push_back(u(2));
+    //a.cmd.push_back(u(3));
+    //a.cmd.push_back(u(4));
     //a.cmd.push_back(u(5));
     //a.cmd.push_back(0);
     //a.cmd.push_back(0);
@@ -229,7 +244,7 @@
     wrist_rot_msg.cmd = u(4);
 
 
-
+    a.cmd = {waist_msg.cmd, shoulder_msg.cmd, elbow_msg.cmd, wrist_ang_msg.cmd, wrist_rot_msg.cmd};
 
     singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
@@ -245,7 +260,7 @@
     //  << " Cmd= " << a.cmd[0] << " " << a.cmd[1] << " " << a.cmd[2] << " " << a.cmd[3] << " " << a.cmd[4]);
     
     // Publish the message.
-    //groupPub.publish(a);
+    groupPub.publish(a);
     
 
     // Set the toques from u and publish
@@ -286,4 +301,61 @@
             k_a_adapt(i, i) = k_a; //* error(i, 0);
         }
     }
+  }
+
+  void AIC::setStep(std::vector<double> controlInput){
+    for(int i=0; i<controlInput.size(); i++){
+      u(i) = controlInput[i];
+    }
+
+    interbotix_xs_msgs::JointGroupCommand a;
+
+    interbotix_xs_msgs::JointSingleCommand waist_msg;
+    interbotix_xs_msgs::JointSingleCommand shoulder_msg;
+    interbotix_xs_msgs::JointSingleCommand elbow_msg;
+    //interbotix_xs_msgs::JointSingleCommand forearm_roll_msg;
+    interbotix_xs_msgs::JointSingleCommand wrist_ang_msg;
+    interbotix_xs_msgs::JointSingleCommand wrist_rot_msg;
+
+
+    a.name = "arm";
+    a.cmd.push_back(u(0));
+    a.cmd.push_back(u(1));
+    a.cmd.push_back(u(2));
+    a.cmd.push_back(u(3));
+    a.cmd.push_back(u(4));
+
+    waist_msg.name = "waist";
+    waist_msg.cmd = u(0);
+
+    shoulder_msg.name = "shoulder";
+    shoulder_msg.cmd = u(1);
+
+    elbow_msg.name = "elbow";
+    elbow_msg.cmd = u(2);
+
+    //forearm_roll_msg.name = "forearm_roll";
+    //forearm_roll_msg.cmd = u(3);
+
+    wrist_ang_msg.name = "wrist_angle";
+    wrist_ang_msg.cmd = u(3);
+
+    wrist_rot_msg.name = "wrist_rotate";
+    wrist_rot_msg.cmd = u(4);
+
+
+
+
+    singlePub.publish(waist_msg);
+    //singlePub.publish(elbow_msg);
+    //singlePub.publish(wrist_ang_msg);
+    //singlePub.publish(wrist_rot_msg);
+
+    // Set the toques from u and publish
+    tau1.data = u(0); tau2.data = u(1); tau3.data = u(2); tau4.data = u(3);
+    tau5.data = u(4); //tau6.data = u(5); //tau7.data = u(6);
+    // Publishing
+    tauPub1.publish(tau1); tauPub2.publish(tau2); tauPub3.publish(tau3);
+    tauPub4.publish(tau4); //tauPub5.publish(tau5); //tauPub6.publish(tau6);
+    //tauPub7.publish(tau7);
   }

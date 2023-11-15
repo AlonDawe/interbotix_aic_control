@@ -126,6 +126,7 @@ add_library(${PROJECT_NAME}
   src/classes/AIC.cpp
   src/classes/uAIC.cpp
   src/classes/ReAIC.cpp
+  src/classes/PID.cpp
 )
 
 ## Declare a C++ library
@@ -159,6 +160,12 @@ target_link_libraries(${PROJECT_NAME}_AIC_node
    ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 
+add_executable(${PROJECT_NAME}_Step_node src/OL_step_response.cpp)
+add_dependencies(${PROJECT_NAME}_Step_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_Step_node
+   ${catkin_LIBRARIES} ${PROJECT_NAME}
+)
+
 add_executable(${PROJECT_NAME}_ReAIC_node src/ReAIC_controller.cpp)
 add_dependencies(${PROJECT_NAME}_ReAIC_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_ReAIC_node
@@ -170,6 +177,13 @@ add_dependencies(${PROJECT_NAME}_uAIC_node ${${PROJECT_NAME}_EXPORTED_TARGETS} $
 target_link_libraries(${PROJECT_NAME}_uAIC_node
    ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
+
+add_executable(${PROJECT_NAME}_PID_node src/PID_controller.cpp)
+add_dependencies(${PROJECT_NAME}_PID_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_PID_node
+   ${catkin_LIBRARIES} ${PROJECT_NAME}
+)
+
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}

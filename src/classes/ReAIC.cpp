@@ -36,6 +36,7 @@
       beliefs_mu_pub = nh.advertise<std_msgs::Float64MultiArray>("beliefs_mu", 10);
       beliefs_mu_p_pub = nh.advertise<std_msgs::Float64MultiArray>("beliefs_mu_p", 10);
       beliefs_mu_pp_pub = nh.advertise<std_msgs::Float64MultiArray>("beliefs_mu_pp", 10);
+      mu_desired_pub = nh.advertise<std_msgs::Float64MultiArray>("mu_desired", 10);
 
     // Initialize the variables for thr AIC
     ReAIC::initVariables();
@@ -142,6 +143,7 @@
     AIC_mu.data.resize(5);
     AIC_mu_p.data.resize(5);
     AIC_mu_pp.data.resize(5);
+    mu_des.data.resize(5);
     SPE.data.resize(2);
   }
 
@@ -151,10 +153,13 @@
     SPEq = (jointPos.transpose()-mu.transpose())*SigmaP_yq0*(jointPos-mu);
     SPEdq = (jointVel.transpose()-mu_p.transpose())*SigmaP_yq1*(jointVel-mu_p);
     SPEmu_p = (mu_p.transpose()+mu.transpose()-mu_d.transpose())*SigmaP_mu*(mu_p+mu-mu_d);
-    SPEmu_pp = (mu_pp.transpose()+mu_p.transpose())*SigmaP_muprime*(mu_pp+mu_p);
+    SPEmu_pp = (mu_pp.transpose()+mu_p.transpose())*SigmaP_muprime*(mu_pp+mu_p);\
+
+    SPEq_d = (mu.transpose()-mu_d.transpose())*SigmaP_yq0_d*(mu-mu_d);
+    SPEdq_d = (mu_p.transpose()-mu_p_d.transpose())*SigmaP_yq1_d*(mu_p-mu_p_d);
 
     // Free-energy as a sum of squared values (i.e. sum the SPE)
-    F.data = SPEq + SPEdq + SPEmu_p + SPEmu_pp;
+    F.data = SPEq + SPEdq + SPEmu_p + SPEmu_pp + SPEq_d + SPEdq_d;
 
     // Free-energy minimization using gradient descent and beliefs update
     mu_dot = mu_p - k_mu*(-SigmaP_yq0*(jointPos-mu) + SigmaP_yq0_d*(mu-mu_d) +SigmaP_mu*(mu_p+mu-mu_d));
@@ -195,7 +200,7 @@
     ReAIC::adjust_learning_rate();
     // Compute control actions through gradient descent of F
     for (int i=0;i<1;i++){
-      u = u-300*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu));
+      u = u-590.0*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu));
     }
 
     if (u(0) > 885.0) {
@@ -218,11 +223,11 @@
 
 
     a.name = "arm";
-    a.cmd.push_back(u(0));
-    a.cmd.push_back(u(1));
-    a.cmd.push_back(u(2));
-    a.cmd.push_back(u(3));
-    a.cmd.push_back(u(4));
+    //a.cmd.push_back(u(0));
+    //a.cmd.push_back(u(1));
+    //a.cmd.push_back(u(2));
+    //a.cmd.push_back(u(3));
+    //a.cmd.push_back(u(4));
     //a.cmd.push_back(u(5));
     //a.cmd.push_back(0);
     //a.cmd.push_back(0);
@@ -259,7 +264,7 @@
     //singlePub.publish(wrist_ang_msg);
     //singlePub.publish(wrist_rot_msg);
 
-
+    a.cmd = {waist_msg.cmd, shoulder_msg.cmd, elbow_msg.cmd, wrist_ang_msg.cmd, wrist_rot_msg.cmd};
 
 
 
@@ -293,7 +298,9 @@
     for(int i=0; i<desiredPos.size(); i++){
       mu_d(i) = desiredPos[i];
       mu_p_d(i) = 0.0;
+      mu_des.data[i] = mu_d(i);
     }
+    mu_desired_pub.publish(mu_des);
   }
 
   std_msgs::Float64MultiArray  ReAIC::getSPE(){
@@ -304,10 +311,13 @@
     error = (jointPos - mu_d).cwiseAbs();
     
     for (int i = 0; i < 5; ++i) {
-        if (error(i, 0) > 0.001) {
+        if (error(i, 0) > 0.05) {
             k_a_adapt(i, i) = k_a;
         } else {
-            k_a_adapt(i, i) = k_a; //* error(i, 0);
+            k_a_adapt(i, i) = k_a; //k_a_adapt(i, i) - 1 * error(i, 0);
+            //if (k_a_adapt(i,i)< 2.0){
+            //  k_a_adapt(i,i) = 2.0;
+            //}
         }
     }
   }

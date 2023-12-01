@@ -70,7 +70,7 @@ private:
   // Learning rates and integration step for the AIC
   double k_mu, k_a, h;
   // Sensory prediction errors
-  double SPEq, SPEdq, SPEmu_p, SPEmu_pp;
+  double SPEq, SPEdq, SPEmu_p, SPEmu_pp, SPEq_d, SPEdq_d;
   // Support variable to control the flow of the script
   int dataReceived;
   // ROS related Variables, node handle
@@ -86,9 +86,9 @@ private:
   Eigen::Matrix<double, 4, 4> DH_T, DH_A, T;
   Eigen::Matrix<double, 3, 1> eePosition;
   // Definition of variables in order to publish the beliefs about the states and the sensory prediction errors
-  std_msgs::Float64MultiArray AIC_mu, AIC_mu_p, AIC_mu_pp, SPE;
+  std_msgs::Float64MultiArray AIC_mu, AIC_mu_p, AIC_mu_pp, SPE, mu_des;
   // Publishers for beliefs
-  ros::Publisher beliefs_mu_pub, beliefs_mu_p_pub, beliefs_mu_pp_pub, SPE_pub;
+  ros::Publisher beliefs_mu_pub, beliefs_mu_p_pub, beliefs_mu_pp_pub, SPE_pub, mu_desired_pub;
 
   
 };

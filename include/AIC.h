@@ -55,8 +55,6 @@ public:
 
   void adjust_learning_rate();
 
-  void setStep(std::vector<double> controlInput);
-
 private:
 
   // Variances associated with the active inference controller and the confidence relative to sensory input and beliefs
@@ -88,9 +86,9 @@ private:
   Eigen::Matrix<double, 4, 4> DH_T, DH_A, T;
   Eigen::Matrix<double, 3, 1> eePosition;
   // Definition of variables in order to publish the beliefs about the states and the sensory prediction errors
-  std_msgs::Float64MultiArray AIC_mu, AIC_mu_p, AIC_mu_pp, SPE;
+  std_msgs::Float64MultiArray AIC_mu, AIC_mu_p, AIC_mu_pp, SPE, mu_des;
   // Publishers for beliefs
-  ros::Publisher beliefs_mu_pub, beliefs_mu_p_pub, beliefs_mu_pp_pub, SPE_pub;
+  ros::Publisher beliefs_mu_pub, beliefs_mu_p_pub, beliefs_mu_pp_pub, SPE_pub, mu_desired_pub;
 
   
 };

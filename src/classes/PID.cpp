@@ -21,7 +21,7 @@
       //tauPub6 = nh.advertise<std_msgs::Float64>("/px150/Left_finger_controller/command", 20);
       //tauPub7 = nh.advertise<std_msgs::Float64>("/px150/right_finger_controller/command", 20);
       sensorSub = nh.subscribe("/px150/joint_states", 1, &PID::jointStatesCallback, this);
-      
+      mu_desired_pub = nh.advertise<std_msgs::Float64MultiArray>("mu_desired", 10);
     // Initialize the variables for thr PID
     PID::initVariables();
   }
@@ -30,24 +30,24 @@
   void   PID::jointStatesCallback(const sensor_msgs::JointState::ConstPtr& msg)
   {
     //Gazebo Setup
-    jointPos(0) = msg->position[5];
-    jointVel(0) = msg->velocity[5];
-    jointPos(1) = msg->position[4];
-    jointVel(1) = msg->velocity[4];
-    jointPos(2) = msg->position[0];
-    jointVel(2) = msg->velocity[0];
-    jointPos(3) = msg->position[6];
-    jointVel(3) = msg->velocity[6];
-    jointPos(4) = msg->position[7];
-    jointVel(4) = msg->velocity[7];
+    //jointPos(0) = msg->position[5];
+    //jointVel(0) = msg->velocity[5];
+    //jointPos(1) = msg->position[4];
+    //jointVel(1) = msg->velocity[4];
+    //jointPos(2) = msg->position[0];
+    //jointVel(2) = msg->velocity[0];
+    //jointPos(3) = msg->position[6];
+    //jointVel(3) = msg->velocity[6];
+    //jointPos(4) = msg->position[7];
+    //jointVel(4) = msg->velocity[7];
     //jointPos(5) = msg->position[8];
     //jointVel(5) = msg->velocity[8];
 
     // Save joint values
-    //for( int i = 0; i < 5; i++ ) {
-    //  jointPos(i) = msg->position[i];
-    //  jointVel(i) = msg->velocity[i];
-    //}
+    for( int i = 0; i < 5; i++ ) {
+      jointPos(i) = msg->position[i];
+      jointVel(i) = msg->velocity[i];
+    }
     // If this is the first time we read the joint states then we set the current beliefs
     if (dataReceived == 0){
       // Track the fact that the encoders published
@@ -96,18 +96,50 @@
     // Initialize control actions
     u << 0.0, 0.0, 0.0, 0.0, 0.0;
 
+    error << 0.0, 0.0, 0.0, 0.0, 0.0;
+    error_p << 0.0, 0.0, 0.0, 0.0, 0.0;
+
+    mu_d << 0.0, 0.0, 0.0, 0.0, 0.0;
+
+    mu_p_d << 0.0, 0.0, 0.0, 0.0, 0.0;
+
+
+    se << 0.0, 0.0, 0.0, 0.0, 0.0;
+
     // Integration step
     h = 0.01;
+
+    mu_des.data.resize(5);
 
   }
 
   void   PID::computeActions(){
-    //PID::adjust_learning_rate();c
+    //PID::adjust_learning_rate();
+    
     error = (mu_d - jointPos);
-    //error_p = (0.0 - jointVel);
+    se = se + error*h;
+    for( int i = 0; i < se.rows(); i = i + 1 ) {
+      if (se(i) > 500.0) {
+        se(i) = 500.0;
+      }
+      else if(se(i) < -500.0){
+        se(i) = -500.0;
+      }
+    }
+    error_p = (mu_p_d - jointVel);
     // Compute control actions
     
-    u = Kp * error; //+ Kd * error_p;
+    u = 590* (Kp * error + Kd * error_p + Ki * se);
+
+    for( int i = 0; i < u.rows(); i = i + 1 ) {
+      if (u(i) > 885.0 ){
+        u(i) = 885.0;
+      }
+      else if (u(i) < -885.0){
+        u(i) = -885.0;
+      }
+    }
+
     
     ROS_INFO_STREAM("Sending random velocity command:"
       << " u= " << u(0) << " " << u(1) << " " << u(2) << " " << u(3) << " " << u(4));
@@ -195,12 +227,14 @@
   void PID::setGoal(std::vector<double> desiredPos){
     for(int i=0; i<desiredPos.size(); i++){
       mu_d(i) = desiredPos[i];
+      mu_des.data[i] = mu_d(i);
     }
+    mu_desired_pub.publish(mu_des);
   }
 
   void PID::setStep(std::vector<double> controlInput){
     for(int i=0; i<controlInput.size(); i++){
-      u(i) = controlInput[i];
+      u(i) = 300*(controlInput[i]);
     }
 
     interbotix_xs_msgs::JointGroupCommand a;

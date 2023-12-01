@@ -50,7 +50,7 @@ private:
   // Beliefs about the states and their derivatives mu, mu', mu'', column vectors of 7 elements
   Eigen::Matrix<double, 5, 1> jointPos, jointVel;
   // Desired robot's states, column vector of 7 elements
-  Eigen::Matrix<double, 5, 1> mu_d, error, error_p;
+  Eigen::Matrix<double, 5, 1> mu_d, mu_p_d, error, error_p, se;
   // Control actions,  column vector of 7 elements
   Eigen::Matrix<double, 5, 1> u;
   // Learning rates and integration step for the PID
@@ -60,11 +60,13 @@ private:
   // ROS related Variables, node handle
   ros::NodeHandle nh;
   // Publishers for joint torques to the topics /panda_joint*_controller/command, and the free-energy
-  ros::Publisher singlePub, groupPub, tauPub1, tauPub2, tauPub3, tauPub4, tauPub5, tauPub6, tauPub7;
+  ros::Publisher singlePub, groupPub, tauPub1, tauPub2, tauPub3, tauPub4, tauPub5, tauPub6, tauPub7, mu_desired_pub;
   // Subscriber for proprioceptive sensors (i.e. from joint_states) and camera (i.e. aruco_single/pose)
   ros::Subscriber sensorSub;
   // Support variables to contain the torques for the joints
   std_msgs::Float64 tau1, tau2, tau3, tau4, tau5, tau6, tau7;
+
+  std_msgs::Float64MultiArray mu_des;
 
 };
 

@@ -15,11 +15,11 @@ int main(int argc, char **argv)
   // Variable for desired position, set here the goal for the Panda for each joint
   std::vector<double> controlInput1(5), controlInput2(5);
 
-  controlInput1[0] = 5.0;
+  controlInput1[0] = 0.0;
   controlInput1[1] = 0.0;
   controlInput1[2] = 0.0;
   controlInput1[3] = 0.0;
-  controlInput1[4] = 0.0;
+  controlInput1[4] = 1.0;
 
   controlInput2[0] = 0.0;
   controlInput2[1] = 0.0;
@@ -42,14 +42,14 @@ int main(int argc, char **argv)
 
   // Main loop
   PID_controller.setStep(controlInput2);
-  while (ros::ok() && cycles <= 20){
+  while (ros::ok() && cycles <= 40){
     // Manage all the callbacks and so read sensors
     ros::spinOnce();
 
     // Skip only first cycle to allow reading the sensory input first
     if ((count!=0)&&(PID_controller.dataReady()==1)){
       cycles ++;
-      if (cycles < 20){
+      if (cycles < 40){
         PID_controller.setStep(controlInput1);
       } else {
         PID_controller.setStep(controlInput2);

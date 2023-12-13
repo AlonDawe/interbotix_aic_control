@@ -2,14 +2,14 @@ import rosbag
 import matplotlib.pyplot as plt
 
 # Step No Friction Response
-#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/PID_2023-11-30-11-33-34.bag"
-#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AIC_2023-11-30-11-29-17.bag"
-#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/ReAIC_conservative_2023-12-01-16-50-52.bag"
+#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/PID_FINAL_2023-12-12-09-59-48.bag"
+#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AIC_FINAL_2023-12-12-09-57-56.bag"
+#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/ReAIC_FINAL_2023-12-12-09-58-51.bag"
 
 # Step Low Friction Response
-bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/PID_VISC_2023-11-30-11-51-12.bag"
-bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AIC_VISC_2023-11-30-11-48-49.bag"
-bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/ReAIC_conservative_VISC_2023-12-01-16-59-04.bag"
+bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/PID_VISC_FINAL_2023-12-12-10-27-56.bag"
+bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AIC_VISC_FINAL_2023-12-12-10-25-34.bag"
+bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/ReAIC_VISC_FINAL_2023-12-12-10-26-53.bag"
 
 
 # Open the bag file
@@ -168,7 +168,7 @@ plt.title('Waist Angle Step Responses')
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 
 # Add a title to the entire figure
-plt.suptitle('Controller Waist Angle Step Responses with Friction')
+plt.suptitle('Controller Waist Angle Step Responses')
 
 # Plot joint position on the first subplot
 ax1.plot(time[0], data[0], '-', label='PID Joint Position (rad)')

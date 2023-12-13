@@ -2,14 +2,14 @@ import rosbag
 import matplotlib.pyplot as plt
 
 # Step Response
-#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_2023-11-30-09-37-38.bag"
-#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_2023-11-30-09-41-03.bag"
-#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_conservative_2023-12-01-16-38-04.bag"
+#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_FINAL_2023-12-12-11-05-16.bag"
+#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_FINAL_2023-12-12-11-03-09.bag"
+#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_FINAL_2023-12-12-11-04-11.bag"
 
 # Loaded Step Response
-bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_LOAD_2023-11-30-10-01-02.bag"
-bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_LOAD_2023-11-30-09-58-28.bag"
-bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_conservative_LOAD_2023-12-01-16-32-12.bag"
+bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_LOAD_FINAL_2023-12-12-11-29-04.bag"
+bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_LOAD_FINAL_2023-12-12-11-08-49.bag"
+bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_LOAD_FINAL_2023-12-12-11-28-08.bag"
 
 
 # Open the bag file
@@ -168,7 +168,7 @@ plt.title('Wrist Angle Loaded Step Responses')
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 
 # Add a title to the entire figure
-plt.suptitle('Controller Wrist Angle Loaded Step Responses')
+plt.suptitle('Controller Wrist Angle')
 
 # Plot joint position on the first subplot
 ax1.plot(time[0], data[0], '-', label='PID Joint Position (rad)')

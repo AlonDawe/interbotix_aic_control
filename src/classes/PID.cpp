@@ -107,7 +107,7 @@
     se << 0.0, 0.0, 0.0, 0.0, 0.0;
 
     // Integration step
-    h = 0.01;
+    h = 0.001;
 
     mu_des.data.resize(5);
 
@@ -118,6 +118,8 @@
     
     error = (mu_d - jointPos);
     se = se + error*h;
+
+    // Prevent integral wind-up
     for( int i = 0; i < se.rows(); i = i + 1 ) {
       if (se(i) > 500.0) {
         se(i) = 500.0;
@@ -189,10 +191,10 @@
 
 
 
-    singlePub.publish(waist_msg);
+    //singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
     //singlePub.publish(wrist_ang_msg);
-    //singlePub.publish(wrist_rot_msg);
+    singlePub.publish(wrist_rot_msg);
 
 
 
@@ -272,10 +274,10 @@
     wrist_rot_msg.name = "wrist_rotate";
     wrist_rot_msg.cmd = u(4);
 
-    singlePub.publish(waist_msg);
+    //singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
     //singlePub.publish(wrist_ang_msg);
-    //singlePub.publish(wrist_rot_msg);
+    singlePub.publish(wrist_rot_msg);
 
     // Set the toques from u and publish
     tau1.data = u(0); tau2.data = u(1); tau3.data = u(2); tau4.data = u(3);

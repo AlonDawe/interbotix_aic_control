@@ -15,11 +15,11 @@ int main(int argc, char **argv)
   // Variable for desired position, set here the goal for the Panda for each joint
   std::vector<double> controlInput1(5), controlInput2(5);
 
-  controlInput1[0] = 0.0;
+  controlInput1[0] = 1.0;
   controlInput1[1] = 0.0;
   controlInput1[2] = 0.0;
   controlInput1[3] = 0.0;
-  controlInput1[4] = 1.0;
+  controlInput1[4] = 0.0;
 
   controlInput2[0] = 0.0;
   controlInput2[1] = 0.0;

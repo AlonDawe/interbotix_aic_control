@@ -68,7 +68,7 @@ private:
   // Control actions,  column vector of 7 elements
   Eigen::Matrix<double, 5, 1> u;
   // Learning rates and integration step for the AIC
-  double k_mu, k_a, h;
+  double k_mu, k_a, h, Kp;
   // Sensory prediction errors
   double SPEq, SPEdq, SPEmu_p, SPEmu_pp, SPEq_d, SPEdq_d;
   // Support variable to control the flow of the script

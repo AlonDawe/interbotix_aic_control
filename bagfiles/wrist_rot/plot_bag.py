@@ -46,7 +46,7 @@ for topic, msg, t in bag.read_messages():
         timestamp = t.to_sec() - step_time # Convert Time to a float
         #print(timestamp)
         
-        data_value = (msg.cmd * 0.113)/100 * 12
+        data_value = (msg.cmd * 0.113)/100 * 12 # --> PWM * 0.113 % of 12V 
 
         # Append data to lists
         timestamps_u.append(timestamp)

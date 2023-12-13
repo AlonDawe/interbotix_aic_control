@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # Specify the path to your ROS bag file
 #bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/_2023-11-21-14-13-48.bag"
-bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/WAIST_STEP_2023-11-29-09-24-21.bag"
+bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/WAIST_STEP_2023-12-04-11-24-48.bag"
 # Open the bag file
 bag = rosbag.Bag(bag_path)
 
@@ -46,7 +46,7 @@ for topic, msg, t in bag.read_messages():
         timestamp = t.to_sec() - step_time # Convert Time to a float
         #print(timestamp)
         
-        data_value = (msg.cmd * 0.113)/100 * 12
+        data_value = (msg.cmd * 0.113)/100 * 12 # --> PWM * 0.113 % of 12V 
 
         # Append data to lists
         timestamps_u.append(timestamp)
@@ -75,12 +75,12 @@ for i in range(len(data_values)):
         break
 
 tau = threshold_timestamp - first_positive_timestamp
-Ko = max_value / 1.0
+Ko = max_value / 0.508
 
 # Design parameters
-w = 6
-z = 1
-a = 0.7
+w = 4.3
+z = 0.9
+a = 1.7
 print("Open-Loop Impulse Response Measurements")
 print("-----------------------------------------")
 print("X_p_ss: ", max_value)

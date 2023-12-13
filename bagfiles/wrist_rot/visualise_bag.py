@@ -2,9 +2,9 @@ import rosbag
 import matplotlib.pyplot as plt
 
 # Step Response
-bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/PID_2023-11-29-19-27-50.bag"
-bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/AIC_2023-11-30-09-44-26.bag"
-bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/ReAIC_conservative_2023-12-01-16-43-15.bag"
+bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/PID_FINAL_2023-12-12-11-44-34.bag"
+bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/AIC_FINAL_2023-12-12-11-41-35.bag"
+bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/ReAIC_FINAL_2023-12-12-11-42-36.bag"
 
 # Open the bag file
 bag1 = rosbag.Bag(bag_path1)

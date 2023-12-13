@@ -123,7 +123,7 @@
     mu_pp << 0.0, 0.0, 0.0, 0.0, 0.0;
 
     // Integration step
-    h = 0.01;
+    h = 0.001;
 
     // Resize Float64MultiArray messages
     AIC_mu.data.resize(5);
@@ -186,6 +186,16 @@
       u = u-590*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu));
       //u = u-h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu));
     }
+
+    for( int i = 0; i < u.rows(); i = i + 1 ) {
+      if (u(i) > 885.0 ){
+        u(i) = 885.0;
+      }
+      else if (u(i) < -885.0){
+        u(i) = -885.0;
+      }
+    }
+
     ROS_INFO_STREAM("Sending random velocity command:"
       << " u= " << u(0) << " " << u(1) << " " << u(2) << " " << u(3) << " " << u(4));
     
@@ -248,10 +258,10 @@
 
     a.cmd = {waist_msg.cmd, shoulder_msg.cmd, elbow_msg.cmd, wrist_ang_msg.cmd, wrist_rot_msg.cmd};
 
-    singlePub.publish(waist_msg);
+    //singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
     //singlePub.publish(wrist_ang_msg);
-    //singlePub.publish(wrist_rot_msg);
+    singlePub.publish(wrist_rot_msg);
 
 
 

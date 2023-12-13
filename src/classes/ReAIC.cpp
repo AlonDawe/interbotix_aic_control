@@ -93,8 +93,8 @@
     // Precision matrices (first set them to zero then populate the diagonal)
     SigmaP_yq0 = Eigen::Matrix<double, 5, 5>::Zero();
     SigmaP_yq1 = Eigen::Matrix<double, 5, 5>::Zero();
-    SigmaP_yq0_d = Eigen::Matrix<double, 5, 5>::Zero();
-    SigmaP_yq1_d = Eigen::Matrix<double, 5, 5>::Zero();
+    //Kp = Eigen::Matrix<double, 5, 5>::Zero();
+    //SigmaP_yq1_d = Eigen::Matrix<double, 5, 5>::Zero();
     SigmaP_mu = Eigen::Matrix<double, 5, 5>::Zero();
     SigmaP_muprime = Eigen::Matrix<double, 5, 5>::Zero();
 
@@ -107,16 +107,16 @@
     nh.getParam("var_muprime", var_muprime);
     nh.getParam("var_q", var_q);
     nh.getParam("var_qdot", var_qdot);
-    nh.getParam("var_q_d", var_q_d);
-    nh.getParam("var_qdot_d", var_qdot_d);
+    nh.getParam("Kp", Kp);
+    //nh.getParam("var_qdot_d", var_qdot_d);
     nh.getParam("k_mu", k_mu);
     nh.getParam("k_a", k_a);
 
     for( int i = 0; i < SigmaP_yq0.rows(); i = i + 1 ) {
       SigmaP_yq0(i,i) = 1/var_q;
       SigmaP_yq1(i,i) = 1/var_qdot;
-      SigmaP_yq0_d(i,i) = 1/var_q_d;
-      SigmaP_yq1_d(i,i) = 1/var_qdot_d;
+      //Kp(i,i) = 1/var_q_d;
+      //SigmaP_yq1_d(i,i) = 1/var_qdot_d;
       SigmaP_mu(i,i) = 1/var_mu;
       SigmaP_muprime(i,i) = 1/var_muprime;
       k_a_adapt(i, i) = k_a;
@@ -135,7 +135,9 @@
     mu_pp << 0.0, 0.0, 0.0, 0.0, 0.0;
 
     // Integration step
-    h = 0.01;
+    h = 0.001;
+
+
 
     
 
@@ -152,19 +154,24 @@
     // Compute single sensory prediction errors
     SPEq = (jointPos.transpose()-mu.transpose())*SigmaP_yq0*(jointPos-mu);
     SPEdq = (jointVel.transpose()-mu_p.transpose())*SigmaP_yq1*(jointVel-mu_p);
-    SPEmu_p = (mu_p.transpose()+mu.transpose()-mu_d.transpose())*SigmaP_mu*(mu_p+mu-mu_d);
-    SPEmu_pp = (mu_pp.transpose()+mu_p.transpose())*SigmaP_muprime*(mu_pp+mu_p);\
+    SPEmu_p = (mu_p.transpose()+Kp*mu.transpose()-Kp*mu_d.transpose())*SigmaP_mu*(mu_p+Kp*mu-Kp*mu_d);
+    SPEmu_pp = (mu_pp.transpose()+Kp*mu_p.transpose())*SigmaP_muprime*(mu_pp+Kp*mu_p);
 
-    SPEq_d = (mu.transpose()-mu_d.transpose())*SigmaP_yq0_d*(mu-mu_d);
-    SPEdq_d = (mu_p.transpose()-mu_p_d.transpose())*SigmaP_yq1_d*(mu_p-mu_p_d);
+    //SPEq_d = (mu.transpose()-mu_d.transpose())*SigmaP_yq0_d*(mu-mu_d);
+    //SPEdq_d = (mu_p.transpose()-mu_p_d.transpose())*SigmaP_yq1_d*(mu_p-mu_p_d);
 
     // Free-energy as a sum of squared values (i.e. sum the SPE)
-    F.data = SPEq + SPEdq + SPEmu_p + SPEmu_pp + SPEq_d + SPEdq_d;
+    F.data = SPEq + SPEdq + SPEmu_p + SPEmu_pp; //+ SPEq_d + SPEdq_d;
 
     // Free-energy minimization using gradient descent and beliefs update
-    mu_dot = mu_p - k_mu*(-SigmaP_yq0*(jointPos-mu) + SigmaP_yq0_d*(mu-mu_d) +SigmaP_mu*(mu_p+mu-mu_d));
-    mu_dot_p = mu_pp - k_mu*(-SigmaP_yq1*(jointVel-mu_p) + SigmaP_yq1_d*(mu_p - mu_p_d) +SigmaP_mu*(mu_p+mu-mu_d)+SigmaP_muprime*(mu_pp+mu_p));
-    mu_dot_pp = - k_mu*(SigmaP_muprime*(mu_pp+mu_p));
+    //mu_dot = mu_p - k_mu*(-SigmaP_yq0*(jointPos-mu) + SigmaP_yq0_d*(mu-mu_d) +SigmaP_mu*(mu_p+3*mu-3*mu_d));
+    //mu_dot_p = mu_pp - k_mu*(-SigmaP_yq1*(jointVel-mu_p) + SigmaP_yq1_d*(mu_p - mu_p_d) +SigmaP_mu*(mu_p+3*mu-3*mu_d)+SigmaP_muprime*(mu_pp+mu_p));
+    //mu_dot_pp = - k_mu*(SigmaP_muprime*(mu_pp+mu_p));
+
+    // Free-energy minimization using gradient descent and beliefs update
+    mu_dot = mu_p - k_mu*(-SigmaP_yq0*(jointPos-mu)+SigmaP_mu*(mu_p+Kp*mu-Kp*mu_d));
+    mu_dot_p = mu_pp - k_mu*(-SigmaP_yq1*(jointVel-mu_p)+SigmaP_mu*(mu_p+Kp*mu-Kp*mu_d)+SigmaP_muprime*(mu_pp+Kp*mu_p));
+    mu_dot_pp = - k_mu*(SigmaP_muprime*(mu_pp+Kp*mu_p));
 
     // Belifs update
     mu = mu + h*mu_dot;             // Belief about the position
@@ -199,15 +206,19 @@
   void   ReAIC::computeActions(){
     ReAIC::adjust_learning_rate();
     // Compute control actions through gradient descent of F
-    for (int i=0;i<1;i++){
-      u = u-590.0*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu));
+    u = u-590.0*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu)); // 590 = torque -> PWM conversion factor
+    
+
+    for( int i = 0; i < u.rows(); i = i + 1 ) {
+      if (u(i) > 885.0 ){
+        u(i) = 885.0;
+      }
+      else if (u(i) < -885.0){
+        u(i) = -885.0;
+      }
     }
 
-    if (u(0) > 885.0) {
-        u(0) = 885.0;
-    } else if (u(0) < -885.0) {
-        u(0) = -885.0;
-    }
+    
 
     ROS_INFO_STREAM("Sending random velocity command:"
       << " u= " << u(0) << " " << u(1) << " " << u(2) << " " << u(3) << " " << u(4));
@@ -259,10 +270,10 @@
 
 
 
-    singlePub.publish(waist_msg);
+    //singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
     //singlePub.publish(wrist_ang_msg);
-    //singlePub.publish(wrist_rot_msg);
+    singlePub.publish(wrist_rot_msg);
 
     a.cmd = {waist_msg.cmd, shoulder_msg.cmd, elbow_msg.cmd, wrist_ang_msg.cmd, wrist_rot_msg.cmd};
 

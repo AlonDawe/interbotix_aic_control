@@ -191,10 +191,10 @@
 
 
 
-    //singlePub.publish(waist_msg);
+    singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
     //singlePub.publish(wrist_ang_msg);
-    singlePub.publish(wrist_rot_msg);
+    //singlePub.publish(wrist_rot_msg);
 
 
 

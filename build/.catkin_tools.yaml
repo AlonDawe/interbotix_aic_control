@@ -1,0 +1,6 @@
+devel_space: /home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/devel
+install: false
+install_space: /home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/install
+profile: default
+source_space: /home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/src
+workspace: /home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control

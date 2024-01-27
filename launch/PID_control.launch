@@ -2,5 +2,5 @@
     <node pkg="interbotix_aic_control" type="interbotix_aic_control_PID_node" name="interbotix_aic_control_PID_node" />
     <rosparam command="load" file="$(find interbotix_aic_control)/config/PID_tuning.yaml" />
 
-    <node pkg="rosbag" name="record" type="record" args="-a -o /home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/PID_FINAL.bag" />
+    <node pkg="rosbag" name="record" type="record" args="-a -o /home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/PID_FINAL.bag" required="true" />
 </launch>

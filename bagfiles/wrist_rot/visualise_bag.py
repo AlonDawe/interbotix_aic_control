@@ -5,33 +5,39 @@ import matplotlib.pyplot as plt
 bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/PID_FINAL_2023-12-12-11-44-34.bag"
 bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/AIC_FINAL_2023-12-12-11-41-35.bag"
 bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/ReAIC_FINAL_2023-12-12-11-42-36.bag"
+bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/AFC_FINAL_2024-01-25-10-40-40.bag"
 
 # Open the bag file
 bag1 = rosbag.Bag(bag_path1)
 bag2 = rosbag.Bag(bag_path2)
 bag3 = rosbag.Bag(bag_path3)
+bag4 = rosbag.Bag(bag_path4)
 
-controllers = ["PID", "AIC", "ReAIC"]
+controllers = ["PID", "AIC", "ReAIC", "AFC"]
 
-bags = [bag1, bag2, bag3]
+bags = [bag1, bag2, bag3, bag4]
 
 REF_timestamps = []
 PID_timestamps = []
 AIC_timestamps = []
 ReAIC_timestamps = []
+AFC_timestamps = []
 
 REF_datavalues = []
 PID_datavalues = []
 AIC_datavalues = []
 ReAIC_datavalues = []
+AFC_datavalues = []
 
 PID_U_timestamps = []
 AIC_U_timestamps = []
 ReAIC_U_timestamps = []
+AFC_U_timestamps = []
 
 PID_U_datavalues = []
 AIC_U_datavalues = []
 ReAIC_U_datavalues = []
+AFC_U_datavalues = []
 
 AIC_mu_timestamps = []
 ReAIC_mu_timestamps = []
@@ -39,11 +45,11 @@ ReAIC_mu_timestamps = []
 AIC_mu_datavalues = []
 ReAIC_mu_datavalues = []
 
-time = [PID_timestamps, AIC_timestamps, ReAIC_timestamps]
-data = [PID_datavalues, AIC_datavalues, ReAIC_datavalues]
+time = [PID_timestamps, AIC_timestamps, ReAIC_timestamps, AFC_timestamps]
+data = [PID_datavalues, AIC_datavalues, ReAIC_datavalues, AFC_datavalues]
 
-control_time = [PID_U_timestamps, AIC_U_timestamps, ReAIC_U_timestamps]
-control_signal = [PID_U_datavalues, AIC_U_datavalues, ReAIC_U_datavalues]
+control_time = [PID_U_timestamps, AIC_U_timestamps, ReAIC_U_timestamps, AFC_U_timestamps]
+control_signal = [PID_U_datavalues, AIC_U_datavalues, ReAIC_U_datavalues, AFC_U_datavalues]
 
 belief_time = [AIC_mu_timestamps, ReAIC_mu_timestamps]
 belief_data = [AIC_mu_datavalues, ReAIC_mu_datavalues]
@@ -130,7 +136,7 @@ for index, bag in enumerate(bags):
     control_time[index] = timestamps_u
     control_signal[index] = data_values_u
     
-    if index != 0:
+    if index == 1 or index == 2:
         belief_time[index-1] = timestamps_mu
         belief_data[index-1] = data_values_mu
     #if index != 0:
@@ -143,7 +149,7 @@ for index, bag in enumerate(bags):
 REF_timestamps = timestamps_mu_d
 REF_datavalues =  data_values_mu_d
 
-for i in range(3):
+for i in range(4):
     plt.plot(time[i], data[i], '-', label=controllers[i])
         
 plt.plot(timestamps_mu_d, data_values_mu_d, 'k-', label='Desired Position')
@@ -162,12 +168,13 @@ plt.title('Wrist Rotation Step Responses')
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 
 # Add a title to the entire figure
-plt.suptitle('Controller Wrist Rotation Step Responses')
+#plt.suptitle('Controller Wrist Rotation Step Responses')
 
 # Plot joint position on the first subplot
 ax1.plot(time[0], data[0], '-', label='PID Joint Position (rad)')
 ax1.plot(time[1], data[1], '-', label='AIC Joint Position (rad)')
 ax1.plot(time[2], data[2], '-', label='ReAIC Joint Position (rad)')
+ax1.plot(time[3], data[3], '-', label='AFC Joint Position (rad)')
 ax1.plot(REF_timestamps, REF_datavalues, 'k-', label='Desired Position')
 ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
 ax1.set_ylabel('Joint Position (rad)')
@@ -178,13 +185,14 @@ ax1.grid(True)  # Turn on the grid for the first subplot
 ax2.plot(control_time[0], control_signal[0], '-', label='PID Control Signal (v)')
 ax2.plot(control_time[1], control_signal[1], '-', label='AIC Control Signal (v)')
 ax2.plot(control_time[2], control_signal[2], '-', label='ReAIC Control Signal (v)')
+ax2.plot(control_time[3], control_signal[3], '-', label='ReAIC Control Signal (v)')
 ax2.set_xlabel('Time (s)')
 ax2.set_ylabel('Control Signal (v)')
 ax2.legend()
 ax2.grid(True)  # Turn on the grid for the first subplot
 
 
-for i in range(3):
+for i in range(4):
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 
     # Add a title to the entire figure
@@ -192,7 +200,7 @@ for i in range(3):
 
     # Plot joint position on the first subplot
     ax1.plot(time[i], data[i], '-', label=controllers[i]+' Joint Position (rad)')
-    if i != 0:
+    if i == 1 or i == 2:
         ax1.plot(belief_time[i-1], belief_data[i-1], '-', label=controllers[i]+' Joint Belief (rad)')
     ax1.plot(REF_timestamps, REF_datavalues, 'k-', label='Desired Position')
     ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
@@ -215,4 +223,5 @@ plt.show()
 bag1.close()
 bag2.close()
 bag3.close()
+bag4.close()
 

@@ -99,6 +99,7 @@
     SigmaP_muprime = Eigen::Matrix<double, 5, 5>::Zero();
 
     k_a_adapt = Eigen::Matrix<double, 5, 5>::Zero();
+    k_mu_adapt = Eigen::Matrix<double, 5, 5>::Zero();
     // Begin Tuning parameters of AIC
     //---------------------------------------------------------------
     // Variances associated with the beliefs and the sensory inputs
@@ -108,6 +109,7 @@
     nh.getParam("var_q", var_q);
     nh.getParam("var_qdot", var_qdot);
     nh.getParam("Kp", Kp);
+    
     //nh.getParam("var_qdot_d", var_qdot_d);
     nh.getParam("k_mu", k_mu);
     nh.getParam("k_a", k_a);
@@ -120,6 +122,8 @@
       SigmaP_mu(i,i) = 1/var_mu;
       SigmaP_muprime(i,i) = 1/var_muprime;
       k_a_adapt(i, i) = k_a;
+      k_mu_adapt(i, i) = k_mu;
+      k_p_adapt(i,i) = Kp;
 
       mu(i) = 0.0;
       mu_p(i) = 0.0;
@@ -169,9 +173,9 @@
     //mu_dot_pp = - k_mu*(SigmaP_muprime*(mu_pp+mu_p));
 
     // Free-energy minimization using gradient descent and beliefs update
-    mu_dot = mu_p - k_mu*(-SigmaP_yq0*(jointPos-mu)+SigmaP_mu*(mu_p+Kp*mu-Kp*mu_d));
-    mu_dot_p = mu_pp - k_mu*(-SigmaP_yq1*(jointVel-mu_p)+SigmaP_mu*(mu_p+Kp*mu-Kp*mu_d)+SigmaP_muprime*(mu_pp+Kp*mu_p));
-    mu_dot_pp = - k_mu*(SigmaP_muprime*(mu_pp+Kp*mu_p));
+    mu_dot = mu_p - k_mu_adapt*(-SigmaP_yq0*(jointPos-mu)+SigmaP_mu*(mu_p+k_p_adapt*mu-k_p_adapt*mu_d));
+    mu_dot_p = mu_pp - k_mu_adapt*(-SigmaP_yq1*(jointVel-mu_p)+SigmaP_mu*(mu_p+k_p_adapt*mu-k_p_adapt*mu_d)+SigmaP_muprime*(mu_pp+k_p_adapt*mu_p));
+    mu_dot_pp = - k_mu_adapt*(SigmaP_muprime*(mu_pp+k_p_adapt*mu_p));
 
     // Belifs update
     mu = mu + h*mu_dot;             // Belief about the position
@@ -272,8 +276,8 @@
 
     //singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
-    //singlePub.publish(wrist_ang_msg);
-    singlePub.publish(wrist_rot_msg);
+    singlePub.publish(wrist_ang_msg);
+    //singlePub.publish(wrist_rot_msg);
 
     a.cmd = {waist_msg.cmd, shoulder_msg.cmd, elbow_msg.cmd, wrist_ang_msg.cmd, wrist_rot_msg.cmd};
 
@@ -319,13 +323,18 @@
   }
 
   void ReAIC::adjust_learning_rate() {
-    error = (jointPos - mu_d).cwiseAbs();
+    error = jointPos - mu_d;
     
-    for (int i = 0; i < 5; ++i) {
-        if (error(i, 0) > 0.05) {
-            k_a_adapt(i, i) = k_a;
+    for (int i = 0; i < 5; i++) {
+        if (abs(error(i, 0)) < 0.02 && jointVel(i) == 0.0) {
+            k_a_adapt(i, i) = 0.0;
+            k_mu_adapt(i, i) = k_mu;
+            k_p_adapt(i,i) = Kp;
+            
         } else {
             k_a_adapt(i, i) = k_a; //k_a_adapt(i, i) - 1 * error(i, 0);
+            k_mu_adapt(i, i) = k_mu;
+            k_p_adapt(i,i) = Kp;
             //if (k_a_adapt(i,i)< 2.0){
             //  k_a_adapt(i,i) = 2.0;
             //}

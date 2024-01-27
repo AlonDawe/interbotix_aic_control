@@ -12,34 +12,39 @@ def ITAE(data, time, ref):
 bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/PID_FINAL_2023-12-12-11-44-34.bag"
 bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/AIC_FINAL_2023-12-12-11-41-35.bag"
 bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/ReAIC_FINAL_2023-12-12-11-42-36.bag"
-
+bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/AFC_FINAL_2024-01-25-10-40-40.bag"
 
 # Open the bag file
 bag1 = rosbag.Bag(bag_path1)
 bag2 = rosbag.Bag(bag_path2)
 bag3 = rosbag.Bag(bag_path3)
+bag4 = rosbag.Bag(bag_path4)
 
-controllers = ["PID", "AIC", "ReAIC"]
+controllers = ["PID", "AIC", "ReAIC", "AFC"]
 
-bags = [bag1, bag2, bag3]
+bags = [bag1, bag2, bag3, bag4]
 
 REF_timestamps = []
 PID_timestamps = []
 AIC_timestamps = []
 ReAIC_timestamps = []
+AFC_timestamps = []
 
 REF_datavalues = []
 PID_datavalues = []
 AIC_datavalues = []
 ReAIC_datavalues = []
+AFC_datavalues = []
 
 PID_U_timestamps = []
 AIC_U_timestamps = []
 ReAIC_U_timestamps = []
+AFC_U_timestamps = []
 
 PID_U_datavalues = []
 AIC_U_datavalues = []
 ReAIC_U_datavalues = []
+AFC_U_datavalues = []
 
 AIC_mu_timestamps = []
 ReAIC_mu_timestamps = []
@@ -47,11 +52,11 @@ ReAIC_mu_timestamps = []
 AIC_mu_datavalues = []
 ReAIC_mu_datavalues = []
 
-time = [PID_timestamps, AIC_timestamps, ReAIC_timestamps]
-data = [PID_datavalues, AIC_datavalues, ReAIC_datavalues]
+time = [PID_timestamps, AIC_timestamps, ReAIC_timestamps, AFC_timestamps]
+data = [PID_datavalues, AIC_datavalues, ReAIC_datavalues, AFC_datavalues]
 
-control_time = [PID_U_timestamps, AIC_U_timestamps, ReAIC_U_timestamps]
-control_signal = [PID_U_datavalues, AIC_U_datavalues, ReAIC_U_datavalues]
+control_time = [PID_U_timestamps, AIC_U_timestamps, ReAIC_U_timestamps, AFC_U_timestamps]
+control_signal = [PID_U_datavalues, AIC_U_datavalues, ReAIC_U_datavalues, AFC_U_datavalues]
 
 belief_time = [AIC_mu_timestamps, ReAIC_mu_timestamps]
 belief_data = [AIC_mu_datavalues, ReAIC_mu_datavalues]
@@ -153,7 +158,7 @@ for index, bag in enumerate(bags):
     control_time[index] = timestamps_u
     control_signal[index] = data_values_u
     
-    if index != 0:
+    if index == 1 or index == 2:
         belief_time[index-1] = timestamps_mu
         belief_data[index-1] = data_values_mu
     #if index != 0:
@@ -176,38 +181,45 @@ step_references = [0.8, 1.6, 0.0, -0.2, -0.4, -0.6, 0.0]
 PID_step_1_data = []
 AIC_step_1_data = []
 ReAIC_step_1_data = []
+AFC_step_1_data = []
 
 PID_step_2_data = []
 AIC_step_2_data = []
 ReAIC_step_2_data = []
+AFC_step_2_data = []
 
 PID_step_3_data = []
 AIC_step_3_data = []
 ReAIC_step_3_data = []
+AFC_step_3_data = []
 
 PID_step_4_data = []
 AIC_step_4_data = []
 ReAIC_step_4_data = []
+AFC_step_4_data = []
 
 PID_step_5_data = []
 AIC_step_5_data = []
 ReAIC_step_5_data = []
+AFC_step_5_data = []
 
 PID_step_6_data = []
 AIC_step_6_data = []
 ReAIC_step_6_data = []
+AFC_step_6_data = []
 
 PID_step_7_data = []
 AIC_step_7_data = []
 ReAIC_step_7_data = []
+AFC_step_7_data = []
 
-controller_step_1_data = [PID_step_1_data, AIC_step_1_data, ReAIC_step_1_data]
-controller_step_2_data = [PID_step_2_data, AIC_step_2_data, ReAIC_step_2_data]
-controller_step_3_data = [PID_step_3_data, AIC_step_3_data, ReAIC_step_3_data]
-controller_step_4_data = [PID_step_4_data, AIC_step_4_data, ReAIC_step_4_data]
-controller_step_5_data = [PID_step_5_data, AIC_step_5_data, ReAIC_step_5_data]
-controller_step_6_data = [PID_step_6_data, AIC_step_6_data, ReAIC_step_6_data]
-controller_step_7_data = [PID_step_7_data, AIC_step_7_data, ReAIC_step_7_data]
+controller_step_1_data = [PID_step_1_data, AIC_step_1_data, ReAIC_step_1_data, AFC_step_1_data]
+controller_step_2_data = [PID_step_2_data, AIC_step_2_data, ReAIC_step_2_data, AFC_step_2_data]
+controller_step_3_data = [PID_step_3_data, AIC_step_3_data, ReAIC_step_3_data, AFC_step_3_data]
+controller_step_4_data = [PID_step_4_data, AIC_step_4_data, ReAIC_step_4_data, AFC_step_4_data]
+controller_step_5_data = [PID_step_5_data, AIC_step_5_data, ReAIC_step_5_data, AFC_step_5_data]
+controller_step_6_data = [PID_step_6_data, AIC_step_6_data, ReAIC_step_6_data, AFC_step_6_data]
+controller_step_7_data = [PID_step_7_data, AIC_step_7_data, ReAIC_step_7_data, AFC_step_7_data]
 
 controller_step_data = [controller_step_1_data, controller_step_2_data, controller_step_3_data, 
                         controller_step_4_data, controller_step_5_data, controller_step_6_data,
@@ -226,7 +238,7 @@ controller_step_time = [controller_step_1_time, controller_step_2_time, controll
                         controller_step_7_time]
 
 
-for i in range(3):
+for i in range(4):
     for index, x in enumerate(time[i]):
         if x >= step_1[0] and x < step_1[1]:
             #controller_step_1_time[i].append(x - step_1[0])
@@ -256,16 +268,17 @@ for i in range(3):
             #controller_step_2_time[i].append(x - step_2[0])
             controller_step_7_data[i].append(data[i][index])
 
-controllers_ITAE = np.zeros((7, 3)) 
-controllers_OS = np.zeros((7, 3))             
+controllers_ITAE = np.zeros((7, 4)) 
+controllers_OS = np.zeros((7, 4))             
         
 for step, controller_step_x_data in enumerate(controller_step_data):
     
     PID_length = len(controller_step_x_data[0])
     AIC_length = len(controller_step_x_data[1])
     ReAIC_length = len(controller_step_x_data[2])
+    AFC_length = len(controller_step_x_data[3])
 
-    lengths = np.array([PID_length, AIC_length, ReAIC_length])
+    lengths = np.array([PID_length, AIC_length, ReAIC_length, AFC_length])
     #print(lengths)
     max_length = np.max(lengths)
     
@@ -281,23 +294,27 @@ for step, controller_step_x_data in enumerate(controller_step_data):
     PID_ITAE = ITAE(np.array(controller_step_x_data[0]), controller_step_time[step], step_references[step])
     AIC_ITAE = ITAE(np.array(controller_step_x_data[1]), controller_step_time[step], step_references[step])
     ReAIC_ITAE = ITAE(np.array(controller_step_x_data[2]), controller_step_time[step], step_references[step])
+    AFC_ITAE = ITAE(np.array(controller_step_x_data[3]), controller_step_time[step], step_references[step])
     
     controllers_ITAE[step, 0] = PID_ITAE
     controllers_ITAE[step, 1] = AIC_ITAE
     controllers_ITAE[step, 2] = ReAIC_ITAE
+    controllers_ITAE[step, 3] = AFC_ITAE
     
     print("STEP {} Performance Analysis: ".format(step+1))
     print("========================================")
     print("PID ITAE: ", PID_ITAE)
     print("AIC ITAE: ", AIC_ITAE)
     print("ReAIC ITAE: ", ReAIC_ITAE)
+    print("AFC ITAE: ", AFC_ITAE)
     
     print("========================================")
     if step > 1 and step < 6:
         PID_max = np.min(controller_step_x_data[0])
         AIC_max = np.min(controller_step_x_data[1])
         ReAIC_max = np.min(controller_step_x_data[2])
-        controller_max = [PID_max, AIC_max, ReAIC_max]
+        AFC_max = np.min(controller_step_x_data[3])
+        controller_max = [PID_max, AIC_max, ReAIC_max, AFC_max]
         
         for controller, max in enumerate(controller_max):
             max_error = max - step_references[step]
@@ -318,7 +335,8 @@ for step, controller_step_x_data in enumerate(controller_step_data):
         PID_max = np.max(controller_step_x_data[0])
         AIC_max = np.max(controller_step_x_data[1])
         ReAIC_max = np.max(controller_step_x_data[2])
-        controller_max = [PID_max, AIC_max, ReAIC_max]
+        AFC_max = np.max(controller_step_x_data[3])
+        controller_max = [PID_max, AIC_max, ReAIC_max, AFC_max]
         
         for controller, max in enumerate(controller_max):
             max_error = max - step_references[step]
@@ -347,7 +365,7 @@ REF_datavalues =  data_values_mu_d
 
 #print(REF_timestamps)
 
-for i in range(3):
+for i in range(4):
     plt.plot(time[i], data[i], '-', label=controllers[i])
         
 plt.plot(timestamps_mu_d, data_values_mu_d, 'k-', label='Desired Position')
@@ -372,6 +390,7 @@ plt.suptitle('Controller Waist Angle Step Responses')
 ax1.plot(time[0], data[0], '-', label='PID Joint Position (rad)')
 ax1.plot(time[1], data[1], '-', label='AIC Joint Position (rad)')
 ax1.plot(time[2], data[2], '-', label='ReAIC Joint Position (rad)')
+ax1.plot(time[3], data[3], '-', label='AFC Joint Position (rad)')
 ax1.plot(REF_timestamps, REF_datavalues, 'k-', label='Desired Position')
 ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
 ax1.set_ylabel('Joint Position (rad)')
@@ -382,13 +401,14 @@ ax1.grid(True)  # Turn on the grid for the first subplot
 ax2.plot(control_time[0], control_signal[0], '-', label='PID Control Signal (v)')
 ax2.plot(control_time[1], control_signal[1], '-', label='AIC Control Signal (v)')
 ax2.plot(control_time[2], control_signal[2], '-', label='ReAIC Control Signal (v)')
+ax2.plot(control_time[3], control_signal[3], '-', label='AFC Control Signal (v)')
 ax2.set_xlabel('Time (s)')
 ax2.set_ylabel('Control Signal (v)')
 ax2.legend()
 ax2.grid(True)  # Turn on the grid for the first subplot
 
 
-for i in range(3):
+for i in range(4):
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 
     # Add a title to the entire figure
@@ -396,7 +416,7 @@ for i in range(3):
 
     # Plot joint position on the first subplot
     ax1.plot(time[i], data[i], '-', label=controllers[i]+' Joint Position (rad)')
-    if i != 0:
+    if i == 1 or i == 2:
         ax1.plot(belief_time[i-1], belief_data[i-1], '-', label=controllers[i]+' Joint Belief (rad)')
     ax1.plot(REF_timestamps, REF_datavalues, 'k-', label='Desired Position')
     ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
@@ -422,6 +442,7 @@ plt.suptitle('Controller Performance Analysis')
 ax1.plot(step_x, controllers_ITAE[:, 0], '-o', label='PID')
 ax1.plot(step_x, controllers_ITAE[:, 1], '-o', label='AIC')
 ax1.plot(step_x, controllers_ITAE[:, 2], '-o', label='ReAIC')
+ax1.plot(step_x, controllers_ITAE[:, 3], '-o', label='AFC')
 #ax1.plot(REF_timestamps, REF_datavalues, 'k-', label='Desired Position')
 #ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
 ax1.set_ylabel('Controller ITAE Score')
@@ -432,6 +453,7 @@ ax1.grid(True)  # Turn on the grid for the first subplot
 ax2.plot(step_x, controllers_OS[:, 0], '-o', label='PID')
 ax2.plot(step_x, controllers_OS[:, 1], '-o', label='AIC')
 ax2.plot(step_x, controllers_OS[:, 2], '-o', label='ReAIC')
+ax2.plot(step_x, controllers_OS[:, 3], '-o', label='AFC')
 ax2.set_xlabel('Step')
 ax2.set_ylabel('Controller Overshoot (%)')
 ax2.legend()
@@ -444,6 +466,7 @@ plt.show()
 bag1.close()
 bag2.close()
 bag3.close()
+bag4.close()
 
 
 

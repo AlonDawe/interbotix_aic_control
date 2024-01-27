@@ -127,6 +127,7 @@ add_library(${PROJECT_NAME}
   src/classes/uAIC.cpp
   src/classes/ReAIC.cpp
   src/classes/PID.cpp
+  src/classes/AFC.cpp
 )
 
 ## Declare a C++ library
@@ -181,6 +182,12 @@ target_link_libraries(${PROJECT_NAME}_uAIC_node
 add_executable(${PROJECT_NAME}_PID_node src/PID_controller.cpp)
 add_dependencies(${PROJECT_NAME}_PID_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_PID_node
+   ${catkin_LIBRARIES} ${PROJECT_NAME}
+)
+
+add_executable(${PROJECT_NAME}_AFC_node src/AFC_controller.cpp)
+add_dependencies(${PROJECT_NAME}_AFC_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_AFC_node
    ${catkin_LIBRARIES} ${PROJECT_NAME}
 )
 

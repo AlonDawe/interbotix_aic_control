@@ -60,7 +60,7 @@ private:
   // Variances associated with the active inference controller and the confidence relative to sensory input and beliefs
   double var_q, var_qdot, var_mu, var_muprime, var_q_d, var_qdot_d;
   // Precision matrices, diagonal matrices with the inverce of the variance
-  Eigen::Matrix<double, 5, 5> SigmaP_yq0, SigmaP_yq1, SigmaP_mu, SigmaP_muprime, SigmaP_yq0_d, SigmaP_yq1_d, k_a_adapt;
+  Eigen::Matrix<double, 5, 5> SigmaP_yq0, SigmaP_yq1, SigmaP_mu, SigmaP_muprime, SigmaP_yq0_d, SigmaP_yq1_d, k_a_adapt, k_mu_adapt, k_p_adapt;
   // Beliefs about the states and their derivatives mu, mu', mu'', column vectors of 7 elements
   Eigen::Matrix<double, 5, 1> mu, mu_p, mu_pp, mu_dot, mu_dot_p, mu_dot_pp, jointPos, jointVel;
   // Desired robot's states, column vector of 7 elements
@@ -68,7 +68,7 @@ private:
   // Control actions,  column vector of 7 elements
   Eigen::Matrix<double, 5, 1> u;
   // Learning rates and integration step for the AIC
-  double k_mu, k_a, h, Kp;
+  double k_mu, k_a, h, Kp, k_mu_original;
   // Sensory prediction errors
   double SPEq, SPEdq, SPEmu_p, SPEmu_pp, SPEq_d, SPEdq_d;
   // Support variable to control the flow of the script

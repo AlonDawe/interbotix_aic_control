@@ -258,10 +258,10 @@
 
     a.cmd = {waist_msg.cmd, shoulder_msg.cmd, elbow_msg.cmd, wrist_ang_msg.cmd, wrist_rot_msg.cmd};
 
-    //singlePub.publish(waist_msg);
+    singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
     //singlePub.publish(wrist_ang_msg);
-    singlePub.publish(wrist_rot_msg);
+    //singlePub.publish(wrist_rot_msg);
 
 
 
@@ -307,10 +307,10 @@
   }
 
   void AIC::adjust_learning_rate() {
-    error = (jointPos - mu_d).cwiseAbs();
+    error = jointPos - mu_d;
     
-    for (int i = 0; i < 5; ++i) {
-        if (error(i, 0) > 0.001) {
+    for (int i = 0; i < 5; i++) {
+        if (abs(error(i, 0)) >= 0.01) {
             k_a_adapt(i, i) = k_a;
         } else {
             k_a_adapt(i, i) = k_a; //* error(i, 0);

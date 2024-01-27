@@ -99,6 +99,14 @@ print("Kp: ", Kp)
 print("Kd: ", Kd)
 print("Ki: ", Ki)
 
+Kp = ((w**2 + 0)*tau)/Ko #tau*w**2/Ko
+Kd = ((2*z*w + 0)*tau -1)/Ko #(2*z*w*tau - 1)/Ko
+
+print("PD Tuning Parameters")
+print("-----------------------------------------")
+print("Kp: ", Kp)
+print("Kd: ", Kd)
+
 
 # Create subplots
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)

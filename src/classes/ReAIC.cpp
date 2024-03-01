@@ -43,6 +43,20 @@
   }
   ReAIC::~ReAIC(){}
 
+  std::vector<double> ReAIC::generateNormalRandomNumbers(double mean, double stddev) {
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count(); // Seed using system time
+    std::default_random_engine generator(seed);
+    std::normal_distribution<double> distribution(mean, stddev);
+    std::vector<double> result(5);
+
+    for (int i = 0; i < 5; ++i) {
+        result[i] = distribution(generator);
+    }
+    
+    return result;
+
+  }
+
   void   ReAIC::jointStatesCallback(const sensor_msgs::JointState::ConstPtr& msg)
   {
     //Gazebo Setup
@@ -60,10 +74,16 @@
     //jointVel(5) = msg->velocity[8];
 
     // Save joint values
+
+    std::vector<double> noise = ReAIC::generateNormalRandomNumbers(0.0, 0.1);
+
     for( int i = 0; i < 5; i++ ) {
-      jointPos(i) = msg->position[i];
-      jointVel(i) = msg->velocity[i];
+      jointPos(i) = msg->position[i] + noise[i];
+      jointVel(i) = msg->velocity[i] + noise[i];
     }
+    //std::stringstream ss;
+    //ss << "Noise: " << noise[4];
+    //ROS_WARN("%s", ss.str().c_str());
     // If this is the first time we read the joint states then we set the current beliefs
     if (dataReceived == 0){
       // Track the fact that the encoders published
@@ -153,7 +173,7 @@
     SPE.data.resize(2);
   }
 
-  void ReAIC::minimiseF(){
+  void ReAIC::minimiseF(int stop){
 
     // Compute single sensory prediction errors
     SPEq = (jointPos.transpose()-mu.transpose())*SigmaP_yq0*(jointPos-mu);
@@ -193,7 +213,7 @@
     SPE.data[1] = SPEdq;
 
     // Calculate and send control actions
-    ReAIC::computeActions();
+    ReAIC::computeActions(stop);
 
     // Publish free-energy
     IFE_pub.publish(F);
@@ -207,11 +227,16 @@
     beliefs_mu_pp_pub.publish(AIC_mu_pp);
   }
 
-  void   ReAIC::computeActions(){
+  void   ReAIC::computeActions(int stop){
     ReAIC::adjust_learning_rate();
     // Compute control actions through gradient descent of F
-    u = u-590.0*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu)); // 590 = torque -> PWM conversion factor
-    
+    if (stop == 0){
+      u = u-590.0*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu)); // 590 = torque -> PWM conversion factor
+    } else {
+      for( int i = 0; i < u.rows(); i = i + 1 ) {
+        u(i) = 0.0;
+      }
+    }
 
     for( int i = 0; i < u.rows(); i = i + 1 ) {
       if (u(i) > 885.0 ){
@@ -276,8 +301,8 @@
 
     //singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
-    singlePub.publish(wrist_ang_msg);
-    //singlePub.publish(wrist_rot_msg);
+    //singlePub.publish(wrist_ang_msg);
+    singlePub.publish(wrist_rot_msg);
 
     a.cmd = {waist_msg.cmd, shoulder_msg.cmd, elbow_msg.cmd, wrist_ang_msg.cmd, wrist_rot_msg.cmd};
 
@@ -326,18 +351,10 @@
     error = jointPos - mu_d;
     
     for (int i = 0; i < 5; i++) {
-        if (abs(error(i, 0)) < 0.02 && jointVel(i) == 0.0) {
+        if (abs(error(i, 0)) < 0.01 && jointVel(i) == 0.0) {
             k_a_adapt(i, i) = 0.0;
-            k_mu_adapt(i, i) = k_mu;
-            k_p_adapt(i,i) = Kp;
-            
         } else {
-            k_a_adapt(i, i) = k_a; //k_a_adapt(i, i) - 1 * error(i, 0);
-            k_mu_adapt(i, i) = k_mu;
-            k_p_adapt(i,i) = Kp;
-            //if (k_a_adapt(i,i)< 2.0){
-            //  k_a_adapt(i,i) = 2.0;
-            //}
+            k_a_adapt(i, i) = k_a;
         }
     }
   }

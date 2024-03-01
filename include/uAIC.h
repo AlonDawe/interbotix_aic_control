@@ -25,6 +25,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <interbotix_xs_msgs/JointGroupCommand.h>
+#include <interbotix_xs_msgs/JointSingleCommand.h>
 
 // Class uAIC to hanle the subscribers and the publishers for the active inference controller
 class uAIC
@@ -78,7 +79,7 @@ private:
   // ROS related Variables, node handle
   ros::NodeHandle nh;
   // Publishers for joint torques to the topics /panda_joint*_controller/command, and the free-energy
-  ros::Publisher groupPub, tauPub1, tauPub2, tauPub3, tauPub4, tauPub5, torque_pub, beliefs_mu_p_pub, beliefs_mu_pub;
+  ros::Publisher singlePub, groupPub, tauPub1, tauPub2, tauPub3, tauPub4, tauPub5, torque_pub, beliefs_mu_p_pub, beliefs_mu_pub;
   // Subscriber for proprioceptive sensors (i.e. from joint_states) and camera (i.e. aruco_single/pose)
   ros::Subscriber sensorSub;
   // Support variables to contain the torques for the joints

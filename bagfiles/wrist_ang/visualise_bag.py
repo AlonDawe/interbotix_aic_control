@@ -2,16 +2,18 @@ import rosbag
 import matplotlib.pyplot as plt
 
 # Step Response
-bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_FINAL_2023-12-12-11-05-16.bag"
-bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_FINAL_2023-12-12-11-03-09.bag"
-bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_FINAL_2023-12-12-11-04-11.bag"
-bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AFC_I_FINAL_2024-01-26-09-51-09.bag"
+
+#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_FINAL_I_2024-01-30-09-50-29.bag"
+#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_FINAL_2023-12-12-11-03-09.bag"
+#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_FINAL_2024-01-30-09-44-56.bag"
+#bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AFC_FINAL_2024-01-25-10-20-46.bag"
 
 # Loaded Step Response
-#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_LOAD_FINAL_2023-12-12-11-29-04.bag"
-#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_LOAD_FINAL_2023-12-12-11-08-49.bag"
-#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_LOAD_FINAL_2023-12-12-11-28-08.bag"
-#bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AFC_LOAD_FINAL_2024-01-25-10-29-30.bag"
+
+bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_LOAD_FINAL_I_2024-01-30-09-59-50.bag"
+bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_LOAD_FINAL_2023-12-12-11-08-49.bag"
+bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_LOAD_FINAL_2024-01-30-10-09-09.bag"
+bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AFC_LOAD_FINAL_2024-01-25-10-29-30.bag"
 
 # Open the bag file
 bag1 = rosbag.Bag(bag_path1)
@@ -156,9 +158,9 @@ REF_timestamps = timestamps_mu_d
 REF_datavalues =  data_values_mu_d
 
 for i in range(4):
-    plt.plot(time[i], data[i], '-', label=controllers[i])
+    plt.step(time[i], data[i], '-', label=controllers[i])
         
-plt.plot(timestamps_mu_d, data_values_mu_d, 'k-', label='Desired Position')
+plt.step(timestamps_mu_d, data_values_mu_d, 'k-', label='Desired Position')
 plt.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
 # Add labels and legend if necessary
 plt.grid(True)
@@ -177,21 +179,21 @@ fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 #plt.suptitle('Controller Wrist Angle')
 
 # Plot joint position on the first subplot
-ax1.plot(time[0], data[0], '-', label='PID Joint Position (rad)')
-ax1.plot(time[1], data[1], '-', label='AIC Joint Position (rad)')
-ax1.plot(time[2], data[2], '-', label='ReAIC Joint Position (rad)')
-ax1.plot(time[3], data[3], '-', label='AFC Joint Position (rad)')
-ax1.plot(REF_timestamps, REF_datavalues, 'k-', label='Desired Position')
+ax1.step(time[0], data[0], '-', label='PID Joint Position (rad)')
+ax1.step(time[1], data[1], '-', label='AIC Joint Position (rad)')
+ax1.step(time[2], data[2], '-', label='ReAIC Joint Position (rad)')
+ax1.step(time[3], data[3], '-', label='AFC Joint Position (rad)')
+ax1.step(REF_timestamps, REF_datavalues, 'k-', label='Desired Position')
 ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
 ax1.set_ylabel('Joint Position (rad)')
 ax1.legend()
 ax1.grid(True)  # Turn on the grid for the first subplot
 
 # Plot control signal on the second subplot
-ax2.plot(control_time[0], control_signal[0], '-', label='PID Control Signal (v)')
-ax2.plot(control_time[1], control_signal[1], '-', label='AIC Control Signal (v)')
-ax2.plot(control_time[2], control_signal[2], '-', label='ReAIC Control Signal (v)')
-ax2.plot(control_time[3], control_signal[3], '-', label='AFC Control Signal (v)')
+ax2.step(control_time[0], control_signal[0], '-', label='PID Control Signal (v)')
+ax2.step(control_time[1], control_signal[1], '-', label='AIC Control Signal (v)')
+ax2.step(control_time[2], control_signal[2], '-', label='ReAIC Control Signal (v)')
+ax2.step(control_time[3], control_signal[3], '-', label='AFC Control Signal (v)')
 ax2.set_xlabel('Time (s)')
 ax2.set_ylabel('Control Signal (v)')
 ax2.legend()
@@ -205,17 +207,17 @@ for i in range(4):
     plt.suptitle(controllers[i]+' Wrist Angle Step Responses')
 
     # Plot joint position on the first subplot
-    ax1.plot(time[i], data[i], '-', label=controllers[i]+' Joint Position (rad)')
+    ax1.step(time[i], data[i], '-', label=controllers[i]+' Joint Position (rad)')
     if i == 1 or i ==2:
-        ax1.plot(belief_time[i-1], belief_data[i-1], '-', label=controllers[i]+' Joint Belief (rad)')
-    ax1.plot(REF_timestamps, REF_datavalues, 'k-', label='Desired Position')
+        ax1.step(belief_time[i-1], belief_data[i-1], '-', label=controllers[i]+' Joint Belief (rad)')
+    ax1.step(REF_timestamps, REF_datavalues, 'k-', label='Desired Position')
     ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
     ax1.set_ylabel('Joint Position (rad)')
     ax1.legend()
     ax1.grid(True)  # Turn on the grid for the first subplot
 
     # Plot control signal on the second subplot
-    ax2.plot(control_time[i], control_signal[i], '-', label=controllers[i]+' Control Signal (v)')
+    ax2.step(control_time[i], control_signal[i], '-', label=controllers[i]+' Control Signal (v)')
     ax2.set_xlabel('Time (s)')
     ax2.set_ylabel('Control Signal (v)')
     ax2.legend()

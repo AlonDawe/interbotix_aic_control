@@ -169,26 +169,8 @@
 
     AFC::signum_1();
 
-    //double sigma1 = sigma(0);
-    //double sigma2 = sigma(1);
-    //double sigma3 = sigma(2);
-    //double sigma4 = sigma(3);
-    //double sigma5 = sigma(4);
-
-    //ROS_WARN("Sigma values: %f, %f, %f, %f, %f", sigma1, sigma2, sigma3, sigma4, sigma5);
-
     k_c_dot = (P * sigma).cwiseProduct((error_p + lambda*error));
-
-    //double sigma1 = (P * sigma)(0);
-    //double sigma2 = (P * sigma)(1);
-    //double sigma3 = (P * sigma)(2);
-    //double sigma4 = (P * sigma)(3);
-    //double sigma5 = (P * sigma)(4);
-
-    //ROS_WARN("k_c_dot values: %f, %f, %f, %f, %f", sigma1, sigma2, sigma3, sigma4, sigma5);
-
     k_c = k_c_prev + h/2 * k_c_dot_prev + h/2 * k_c_dot; 
-
     k_c_dot_prev = k_c_dot;
     k_c_prev = k_c;
 
@@ -252,9 +234,9 @@
 
 
 
-    //singlePub.publish(waist_msg);
+    singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
-    singlePub.publish(wrist_ang_msg);
+    //singlePub.publish(wrist_ang_msg);
     //singlePub.publish(wrist_rot_msg);
 
 

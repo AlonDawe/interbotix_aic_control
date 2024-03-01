@@ -310,10 +310,10 @@
     error = jointPos - mu_d;
     
     for (int i = 0; i < 5; i++) {
-        if (abs(error(i, 0)) >= 0.01) {
-            k_a_adapt(i, i) = k_a;
+        if (abs(error(i, 0)) < 0.01 && jointVel(i) == 0.0) {
+            k_a_adapt(i, i) = 0.0;
         } else {
-            k_a_adapt(i, i) = k_a; //* error(i, 0);
+            k_a_adapt(i, i) = k_a; //k_a_adapt(i, i) - 1 * error(i, 0);
         }
     }
   }

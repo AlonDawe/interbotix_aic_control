@@ -28,7 +28,7 @@ int main(int argc, char **argv)
   int cycles = 0;
   double t = 0.0;
   double sinusoidalPos = 0.0;
-  const int joint = 3;
+  const int joint = 4;
 
   //  Variables for sinusoidal trajectory
   const double frequency = 0.1;  // Frequency of the sinusoidal motion (adjust as needed)
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 
     // Skip only first cycle to allow reading the sensory input first
     if ((count!=0)&&(ReAIC_controller.dataReady()==1)){
-      ReAIC_controller.minimiseF();
+      ReAIC_controller.minimiseF(0);
       cycles ++;
 
       if (cycles < 3000){
@@ -158,5 +158,6 @@ int main(int argc, char **argv)
     
     rate.sleep();
   }
+  ReAIC_controller.minimiseF(1);
   return 0;
 }

@@ -9,9 +9,9 @@ def ITAE(data, time, ref):
     return ITAE
 
 # Step Response
-bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/PID_FINAL_2023-12-12-11-44-34.bag"
+bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/PID_FINAL_I_2024-01-29-22-27-35.bag"
 bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/AIC_FINAL_2023-12-12-11-41-35.bag"
-bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/ReAIC_FINAL_2023-12-12-11-42-36.bag"
+bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/ReAIC_FINAL_2024-01-30-09-16-22.bag"
 bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/AFC_FINAL_2024-01-25-10-40-40.bag"
 
 # Open the bag file

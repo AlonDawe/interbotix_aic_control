@@ -29,6 +29,8 @@
 #include <stdlib.h>
 #include <interbotix_xs_msgs/JointGroupCommand.h>
 #include <interbotix_xs_msgs/JointSingleCommand.h>
+#include <random>
+#include <chrono>
 
 // Class AIC to hanle the subscribers and the publishers for the active inference controller
 class ReAIC
@@ -43,15 +45,17 @@ public:
   // Method to set the necessary variables once the constructor is called
   void initVariables();
   // Main method which minimises the free-energy using gradient descent
-  void minimiseF();
+  void minimiseF(int stop);
   // Calculate and send the torque commands to compute actions and further minimise the free-energy
-  void computeActions();
+  void computeActions(int stop);
   // Support method to control the program flow. Data ready returns one when the encoders has been read
   int dataReady();
   // Set desired position
   void setGoal(std::vector<double> desiredPos);
   // get methods for sensory prediction errors
   std_msgs::Float64MultiArray getSPE();
+
+  std::vector<double> generateNormalRandomNumbers(double mean, double stddev);
 
   void adjust_learning_rate(); 
 

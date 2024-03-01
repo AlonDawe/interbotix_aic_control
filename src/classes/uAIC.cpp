@@ -17,6 +17,7 @@
     uAIC::initVariables();
       // Torque publisher
       groupPub = nh.advertise<interbotix_xs_msgs::JointGroupCommand>("/px150/commands/joint_group", 20);
+      singlePub = nh.advertise<interbotix_xs_msgs::JointSingleCommand>("/px150/commands/joint_single", 20);
 
       tauPub1 = nh.advertise<std_msgs::Float64>("/px150/waist_controller/command", 20);
       tauPub2 = nh.advertise<std_msgs::Float64>("/px150/shoulder_controller/command", 20);
@@ -53,22 +54,22 @@
   {
 
     //Gazebo Setup
-    jointPos(0) = msg->position[5];
-    jointVel(0) = msg->velocity[5];
-    jointPos(1) = msg->position[4];
-    jointVel(1) = msg->velocity[4];
-    jointPos(2) = msg->position[0];
-    jointVel(2) = msg->velocity[0];
-    jointPos(3) = msg->position[6];
-    jointVel(3) = msg->velocity[6];
-    jointPos(4) = msg->position[7];
-    jointVel(4) = msg->velocity[7];
+    //jointPos(0) = msg->position[5];
+    //jointVel(0) = msg->velocity[5];
+    //jointPos(1) = msg->position[4];
+    //jointVel(1) = msg->velocity[4];
+    //jointPos(2) = msg->position[0];
+    //jointVel(2) = msg->velocity[0];
+    //jointPos(3) = msg->position[6];
+    //jointVel(3) = msg->velocity[6];
+    //jointPos(4) = msg->position[7];
+    //jointVel(4) = msg->velocity[7];
 
     // Save joint values
-    //for( int i = 0; i < 5; i++ ) {
-    //  jointPos(i) = msg->position[i];
-    //  jointVel(i) = msg->velocity[i];
-    //}
+    for( int i = 0; i < 5; i++ ) {
+      jointPos(i) = msg->position[i];
+      jointVel(i) = msg->velocity[i];
+    }
     // If this is the first time we read the joint states then we set the current beliefs
     if (dataReceived == 0){
       // Track the fact that the encoders published
@@ -98,7 +99,7 @@
     // Begin Tuning parameters of u-AIC
     //---------------------------------------------------------------
     // Variances associated with the beliefs and the sensory inputs
-    ROS_INFO("Setting parameters from parameter space");
+    ROS_INFO("Setting u-AIC parameters from parameter space");
     nh.getParam("var_mu", var_mu);
     nh.getParam("var_muprime", var_muprime);
     nh.getParam("var_q", var_q);

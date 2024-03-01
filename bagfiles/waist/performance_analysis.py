@@ -1,6 +1,12 @@
 import rosbag
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import rcParams
+
+# Set font and size to match LaTeX document
+rcParams['font.family'] = 'serif'
+#rcParams['font.serif'] = ['Computer Modern']
+rcParams['font.size'] = 10
 
 def ITAE(data, time, ref):
     error = abs(data - ref)
@@ -9,16 +15,17 @@ def ITAE(data, time, ref):
     return ITAE
 
 # Step No Friction Response
-#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/PID_FINAL_2023-12-12-09-59-48.bag"
-#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AIC_FINAL_2023-12-12-09-57-56.bag"
-#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/ReAIC_FINAL_2023-12-12-09-58-51.bag"
-#bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AFC_FINAL_2024-01-25-09-08-22.bag"
+bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/PID_FINAL_I_2024-01-30-11-08-20.bag"
+bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AIC_FINAL_2023-12-12-09-57-56.bag"
+bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/ReAIC_FINAL_2024-01-30-10-41-21.bag"
+#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WAIST_Kp_3_Ka_5p5_2024-02-27-14-30-46.bag"
+bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AFC_FINAL_2024-01-25-09-08-22.bag"
 
 # Step Low Friction Response
-bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/PID_VISC_FINAL_2023-12-12-10-27-56.bag"
-bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AIC_VISC_FINAL_2023-12-12-10-25-34.bag"
-bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/ReAIC_VISC_FINAL_2023-12-12-10-26-53.bag"
-bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AFC_VISC_FINAL_2024-01-25-09-52-57.bag"
+#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/PID_VISC_FINAL_I_2024-01-30-11-21-35.bag"
+#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AIC_VISC_FINAL_2023-12-12-10-25-34.bag"
+#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/ReAIC_VISC_FINAL_2024-01-30-11-38-20.bag"
+#bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/AFC_VISC_FINAL_2024-01-25-09-52-57.bag"
 
 # Open the bag file
 bag1 = rosbag.Bag(bag_path1)

@@ -2,6 +2,9 @@ import rosbag
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import rcParams
+import tikzplotlib
+#matplotlib2tikz.save("mytikz.tex")
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes,  mark_inset
 
 # Set font and size to match LaTeX document
 rcParams['font.family'] = 'serif'
@@ -14,10 +17,16 @@ def ITAE(data, time, ref):
     ITAE = np.sum(error * time * dt)
     return ITAE
 
+def error(data, ref):
+    error = data - ref
+    #dt = time[1] - time[0]
+    #ITAE = np.sum(error * time * dt)
+    return error
+
 def settl_time(data, time, ref):
     error = abs(data - ref)
     cnt = 0
-    settling_time = 10.0
+    settling_time = 5.0
     #print(len(error))
     #print(len(time))
     for idx, err in enumerate(error):
@@ -30,20 +39,32 @@ def settl_time(data, time, ref):
             else:
                 cnt = 0
     return settling_time
+
+def tikzplotlib_fix_ncols(obj):
+    """
+    workaround for matplotlib 3.6 renamed legend's _ncol to _ncols, which breaks tikzplotlib
+    """
+    if hasattr(obj, "_ncols"):
+        obj._ncol = obj._ncols
+    for child in obj.get_children():
+        tikzplotlib_fix_ncols(child)
             
             
 
 # Step Response
-#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_3_Ka_5.bag"
-#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_3_Ka_5.bag"
-#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_3_Ka_5.bag"
-#bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_3_Ka_5.bag"
-#bag_path5 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_3_Ka_5.bag"
-bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_3_Ka_4_NOISE_var_1.bag"
+bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_3_Ka_4.bag"
+#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_6_Ka_2.bag"
+#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_6_Ka_3.bag"
+#bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_6_Ka_4.bag"
+#bag_path5 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_6_Ka_5.bag"
+##############NOISE#######################
+#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_3_Ka_4_NOISE_var_1.bag"
 bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_3_Ka_4_NOISE_var_2.bag"
 bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_3_Ka_4_NOISE_var_3.bag"
 bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_2_Ka_4_NOISE_var_3_varmu_1_2024-02-29-14-26-53.bag"
-bag_path5 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_2_Ka_4_NOISE_var_2_varmu_1.bag"
+bag_path5 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_2_Ka_4_NOISE_var_3_varmu_1.bag"
+
+###################
 #bag_path5 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_3_Ka_4_NOISE_var_3_varmu_3.bag"
 
 #bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WAIST_Kp_2_Ka_5p5_2024-02-27-14-29-40.bag"
@@ -293,40 +314,60 @@ controller_step_time = [controller_step_1_time, controller_step_2_time, controll
                         controller_step_4_time, controller_step_5_time, controller_step_6_time,
                         controller_step_7_time]
 
+PID_error = []
+AIC_error = []
+ReAIC_error = []
+AFC_error = []
+Tune_error = []
+
+errors = [PID_error, AIC_error, ReAIC_error, AFC_error, Tune_error]
 
 for i in range(5):
     for index, x in enumerate(time[i]):
+        if x < step_1[0]:
+            errors[i].append(error(data[i][index], 0.0))
         if x >= step_1[0] and x < step_1[1]:
             #controller_step_1_time[i].append(x - step_1[0])
             controller_step_1_data[i].append(data[i][index])
+            errors[i].append(error(data[i][index], step_references[0]))
             
         if x >= step_2[0] and x < step_2[1]:
             #controller_step_2_time[i].append(x - step_2[0])
             controller_step_2_data[i].append(data[i][index])
+            errors[i].append(error(data[i][index], step_references[1]))
         
         if x >= step_3[0] and x < step_3[1]:
             #controller_step_2_time[i].append(x - step_2[0])
             controller_step_3_data[i].append(data[i][index])
+            errors[i].append(error(data[i][index], step_references[2]))
         
         if x >= step_4[0] and x < step_4[1]:
             #controller_step_2_time[i].append(x - step_2[0])
             controller_step_4_data[i].append(data[i][index])
+            errors[i].append(error(data[i][index], step_references[3]))
             
         if x >= step_5[0] and x < step_5[1]:
             #controller_step_2_time[i].append(x - step_2[0])
             controller_step_5_data[i].append(data[i][index])
+            errors[i].append(error(data[i][index], step_references[4]))
             
         if x >= step_6[0] and x < step_6[1]:
             #controller_step_2_time[i].append(x - step_2[0])
             controller_step_6_data[i].append(data[i][index])
+            errors[i].append(error(data[i][index], step_references[5]))
             
         if x >= step_7[0] and x < step_7[1]:
             #controller_step_2_time[i].append(x - step_2[0])
             controller_step_7_data[i].append(data[i][index])
+            errors[i].append(error(data[i][index], step_references[6]))
 
 controllers_ITAE = np.zeros((7, 5)) 
 controllers_OS = np.zeros((7, 5)) 
-controllers_ST = np.zeros((7, 5))            
+controllers_ST = np.zeros((7, 5))
+#controllers_error = np.zeros((7, 5))
+
+
+            
         
 for step, controller_step_x_data in enumerate(controller_step_data):
     
@@ -361,6 +402,30 @@ for step, controller_step_x_data in enumerate(controller_step_data):
     AFC_ST = settl_time(np.array(controller_step_x_data[3]), controller_step_time[step], step_references[step])
     Tune_ST = settl_time(np.array(controller_step_x_data[4]), controller_step_time[step], step_references[step])
     
+    ##for item in controller_step_x_data[0]:
+    #    PID_error.append(error(item, step_references[step]))
+    
+    #for item in controller_step_x_data[1]:
+    #    AIC_error.append(error(item, step_references[step]))
+        
+    #for item in controller_step_x_data[2]:
+    #    ReAIC_error.append(error(item, step_references[step]))
+    
+    #for item in controller_step_x_data[3]:
+    #    AFC_error.append(error(item, step_references[step]))
+        
+    #for item in controller_step_x_data[4]:
+    #    Tune_error.append(error(item, step_references[step]))
+    
+    
+    #PID_error.append(error(np.array(controller_step_x_data[0]), step_references[step])[:])
+    #AIC_error.append(error(np.array(controller_step_x_data[1]), step_references[step])[:])
+    #ReAIC_error.append(error(np.array(controller_step_x_data[2]), step_references[step])[:])
+    #AFC_error.append(error(np.array(controller_step_x_data[3]), step_references[step])[:])
+    #Tune_error.append(error(np.array(controller_step_x_data[4]), step_references[step])[:])
+    
+    
+    
     controllers_ITAE[step, 0] = PID_ITAE
     controllers_ITAE[step, 1] = AIC_ITAE
     controllers_ITAE[step, 2] = ReAIC_ITAE
@@ -372,6 +437,12 @@ for step, controller_step_x_data in enumerate(controller_step_data):
     controllers_ST[step, 2] = ReAIC_ST
     controllers_ST[step, 3] = AFC_ST
     controllers_ST[step, 4] = Tune_ST
+    
+    #controllers_error[step, 0] = PID_error
+    #controllers_error[step, 1] = AIC_error
+    #controllers_error[step, 2] = ReAIC_error
+    #controllers_error[step, 3] = AFC_error
+    #controllers_error[step, 4] = Tune_error
     
     print("STEP {} Performance Analysis: ".format(step+1))
     print("========================================")
@@ -514,9 +585,9 @@ for step, controller_step_x_data in enumerate(controller_step_data):
     
 #np.save('parameter_grid_Kp_6', parameter_tuning) 
 
-column_ITAE_variances = np.var(controllers_ITAE, axis=0) 
-column_ST_variances = np.var(controllers_ST, axis=0) 
-column_OS_variances = np.var(controllers_OS, axis=0)
+column_ITAE_variances = np.std(controllers_ITAE, axis=0) 
+column_ST_variances = np.std(controllers_ST, axis=0) 
+column_OS_variances = np.std(controllers_OS, axis=0)
 
 column_ITAE_mean = np.mean(controllers_ITAE, axis=0) 
 column_ST_mean = np.mean(controllers_ST, axis=0) 
@@ -551,38 +622,85 @@ plt.ylabel('Joint Position (rad)')
 plt.legend()
 plt.title('Wrist Rotation Step Responses')
 
-
-
+print("Data size: ", len(data[0]))
+print("PID_error size: ", len(PID_error))
+print("time size: ", len(time[0]))
 
 # Create subplots
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 
 # Add a title to the entire figure
-plt.suptitle('Wrist Rotation Step Responses with Noise')
+#plt.suptitle('Wrist Rotation Step Responses with Noise')
 
 # Plot joint position on the first subplot
-ax1.step(time[0], data[0], '-', label='$\mathcal{K}_{p}$: 3; $\sigma_{q}$, $\sigma_{\dot{q}}$: 1')
-ax1.step(time[1], data[1], '-', label='$\mathcal{K}_{p}$: 3; $\sigma_{q}$, $\sigma_{\dot{q}}$: 2')
-ax1.step(time[2], data[2], '-', label='$\mathcal{K}_{p}$: 3; $\sigma_{q}$, $\sigma_{\dot{q}}$: 3')
-ax1.step(time[3], data[3], '-', label='$\mathcal{K}_{p}$: 2; $\sigma_{q}$, $\sigma_{\dot{q}}$: 3')
+ax1.step(time[0], data[0], '-', label='$\mathcal{K}_{p} = 3$; $\sigma_{q} = \sigma_{\dot{q}} = 1$', zorder = 4)
+ax1.step(time[1], data[1], '-', label='$\mathcal{K}_{p} = 3$; $\sigma_{q} = \sigma_{\dot{q}} = 2$', zorder = 1)
+ax1.step(time[2], data[2], '-', label='$\mathcal{K}_{p} = 3$; $\sigma_{q} = \sigma_{\dot{q}} = 3$', zorder = 2)
+ax1.step(time[3], data[3], '-', label='$\mathcal{K}_{p} = 2$; $\sigma_{q} = \sigma_{\dot{q}} = 3$', zorder = 3)
 #ax1.step(time[4], data[4], '-', label='Ka = 5 Joint Position (rad)')
-ax1.step(REF_timestamps, REF_datavalues, 'k-', label='Goal Position $\mu_{g}$')
-ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
-ax1.set_ylabel('Joint Position ($rad$)')
-ax1.legend(fontsize='x-small')
+ax1.step(REF_timestamps, REF_datavalues, color='k', linestyle='--', label='$\mu_{g}$', zorder = 0)
+
+#ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
+ax1.set_ylabel('Joint Angle (rad)')
+ax1.legend(ncol=3, fontsize='small', frameon=False, loc='upper center', bbox_to_anchor =(0.5, 1.35))#fontsize='x-small'
 ax1.grid(True)  # Turn on the grid for the first subplot
+ax1.set_xlim(0, 30)
 
 # Plot control signal on the second subplot
-ax2.step(control_time[0], control_signal[0], '-') #, label='Ka = 1 Control Signal (v)')
-ax2.step(control_time[1], control_signal[1], '-')#, #label='Ka = 2 Control Signal (v)')
-ax2.step(control_time[2], control_signal[2], '-')#, #label='Ka = 3 Control Signal (v)')
-ax2.step(control_time[3], control_signal[3], '-')#, #label='Ka = 4 Control Signal (v)')
+ax2.step(control_time[0], control_signal[0], '-', zorder = 4) #, label='Ka = 1 Control Signal (v)')
+ax2.step(control_time[1], control_signal[1], '-', zorder = 1)#, #label='Ka = 2 Control Signal (v)')
+ax2.step(control_time[2], control_signal[2], '-', zorder = 2)#, #label='Ka = 3 Control Signal (v)')
+ax2.step(control_time[3], control_signal[3], '-', zorder = 3)#, #label='Ka = 4 Control Signal (v)')
 #ax2.step(control_time[4], control_signal[4], '-', label='Ka = 5 Control Signal (v)')
-ax2.set_xlabel('Time ($sec$)')
-ax2.set_ylabel('Control Signal ($v$)')
-ax2.legend(fontsize='x-small')
+ax2.set_xlabel('Time (s)')
+ax2.set_ylabel('Control Signal (V)')
+#ax2.legend(fontsize='x-small')
 ax2.grid(True)  # Turn on the grid for the first subplot
+ax2.set_xlim(0, 30)
 
+# Create inset axes for the zoomed-in view
+axins = inset_axes(ax1, width="45%", height="45%", loc='upper right')
+axins.step(time[0], data[0], '-')
+axins.step(time[1], data[1], '-')
+axins.step(time[2], data[2], '-')
+axins.step(time[3], data[3], '-')
+axins.step(REF_timestamps, REF_datavalues, 'k', linestyle='--', zorder = 0)
+axins.set_xlim(13, 18)
+axins.set_ylim(-0.35, 0.35)
+plt.xticks(visible=False)
+plt.yticks(visible=False)
+
+ax1.indicate_inset_zoom(axins, edgecolor="black")
+# Mark the inset area and draw connecting lines
+mark_inset(ax1, axins, loc1=2, loc2=4, fc="none", ec="0.7")
+
+#fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/Kp3_Ka4_step_response_with_noise_new.pdf')
+#fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/Step_responses_with_noise_new.pdf')
+
+#ax3.step(time[0], PID_error, '-')
+#ax3.step(time[1], AIC_error, '-')
+#ax3.step(time[2], ReAIC_error, '-')
+#ax3.step(time[3], AFC_error, '-')
+#ax3.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
+#ax3.set_ylabel('Joint Error ($rad$)')
+#ax3.set_xlabel('Time ($s$)')
+#ax3.grid(True)  # Turn on the grid for the first subplot
+
+fig5, ax5 = plt.subplots(1, 1, sharex=True)
+
+# Plot joint position on the first subplot
+ax5.step(time[0], PID_error, '-')
+ax5.step(time[1], AIC_error, '-')
+ax5.step(time[2], ReAIC_error, '-')
+ax5.step(time[3], AFC_error, '-')
+ax5.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
+ax5.set_ylabel('Joint Error ($rad$)')
+ax5.set_xlabel('Time ($s$)')
+ax5.set_title('Joint Errors')
+#ax3.legend(fontsize='x-small')
+ax5.grid(True)  # Turn on the grid for the first subplot
+#tikzplotlib_fix_ncols(fig)
+#tikzplotlib.save("/home/alon/Documents/thesis/Tuning Parameter Influences/Step_responses_with_noise.tex")
 #fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/Step_responses_with_noise_var_only.pdf')
 
 
@@ -613,24 +731,25 @@ for i in range(5):
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 
 # Add a title to the entire figure
-plt.suptitle('Wrist Rotation Step Response with Noise [$\mathcal{K}_{p}$: 3; $\kappa_{a}$: 4]')
+#plt.suptitle('Wrist Rotation Step Response with Noise [$\mathcal{K}_{p}$: 3; $\kappa_{a}$: 4]')
 
 # Plot joint position on the first subplot
-ax1.step(time[0], data[0], '-', label='Joint Position $y$')
-ax1.step(REF_timestamps, REF_datavalues, 'k-', label='Goal Position $\mu_{g}$')
-ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
-ax1.set_ylabel('Joint Position ($rad$)')
-ax1.legend()
+ax1.step(time[0], data[0], '-', label='$\mathcal{K}_{p} = 3$; $\kappa_{a} = 4$')
+ax1.step(REF_timestamps, REF_datavalues, color ='k', linestyle='--', label='$\mu_{g}$', zorder=0)
+#ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
+ax1.set_ylabel('Joint Angle (rad)')
+ax1.legend(ncol=2, fontsize='small', frameon=False, loc='upper center', bbox_to_anchor =(0.5, 1.2))
 ax1.grid(True)  # Turn on the grid for the first subplot
+ax1.set_xlim(0, 30)
 
 # Plot control signal on the second subplot
-ax2.step(control_time[0], control_signal[0], '-', label='Joint Control Signal $u$')
-ax2.set_xlabel('Time ($sec$)')
-ax2.set_ylabel('Control Signal ($v$)')
-ax2.legend()
+ax2.step(control_time[0], control_signal[0])
+ax2.set_xlabel('Time (s)')
+ax2.set_ylabel('Control Signal (V)')
 ax2.grid(True)  # Turn on the grid for the first subplot
-
-#fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/Kp3_Ka4_step_response_with_noise.pdf')
+ax2.set_xlim(0, 30)
+#fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/Kp3_Ka4_step_response_with_noise_new.pdf')
+#fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/Kp3_Ka4_step_response_new.pdf')
 
 
 step_x = [1, 2, 3, 4, 5, 6, 7]
@@ -674,14 +793,15 @@ ax3.grid(True)  # Turn on the grid for the first subplot
 
 fig4, ax4 = plt.subplots(1, 1, sharex=True)
 
-ax4.step(timestamps_mu_d, data_values_mu_d, 'k-', label='Goal Position $\mu_{g}$')
-ax4.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
+ax4.step(timestamps_mu_d, data_values_mu_d, color='k', linestyle='--', label='$\mu_{g}$')
+#ax4.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
 # Add labels and legend if necessary
 ax4.grid(True)
 ax4.set_xlabel('Time (s)')
-ax4.set_ylabel('Joint Position (rad)')
+ax4.set_ylabel('Joint Angle (rad)')
 ax4.legend()
-ax4.set_title('Wrist Rotation Step Responses')
+#ax4.set_title('Wrist Rotation Step Response Goals')
+ax4.set_xlim(0, 30)
 
 # Add step numbers slightly shifted up and bolded
 for i, (step, ref) in enumerate(zip(steps, step_references), start=1):
@@ -689,7 +809,7 @@ for i, (step, ref) in enumerate(zip(steps, step_references), start=1):
     ax4.text(step_center, ref + 0.05, f'{i}', color='black',
              horizontalalignment='center', verticalalignment='center', fontweight='bold')
 
-#fig4.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/wrist_rotation_goal_step_responses.pdf')
+#fig4.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/wrist_rotation_goal_step_responses_new.pdf')
 
 
 # Show the plot

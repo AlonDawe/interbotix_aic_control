@@ -30,8 +30,8 @@ int main(int argc, char **argv)
   // Object of the class AIC which will take care of everything
   PID PID_controller(robot);
   // Set desired position in the AIC class
-  ros::Rate rate(100);
-  while (count<100){
+  ros::Rate rate(1000);
+  while (count<1000){
     // Manage all the callbacks and so read sensors
     ros::spinOnce();
       count ++;
@@ -42,14 +42,14 @@ int main(int argc, char **argv)
 
   // Main loop
   PID_controller.setStep(controlInput2);
-  while (ros::ok() && cycles <= 40){
+  while (ros::ok() && cycles <= 400){
     // Manage all the callbacks and so read sensors
     ros::spinOnce();
 
     // Skip only first cycle to allow reading the sensory input first
     if ((count!=0)&&(PID_controller.dataReady()==1)){
       cycles ++;
-      if (cycles < 40){
+      if (cycles < 400){
         PID_controller.setStep(controlInput1);
       } else {
         PID_controller.setStep(controlInput2);

@@ -28,7 +28,7 @@ int main(int argc, char **argv)
   int cycles = 0;
   double t = 0.0;
   double sinusoidalPos = 0.0;
-  const int joint = 0;
+  const int joint = 4;
 
   //  Variables for sinusoidal trajectory
   const double frequency = 0.1;  // Frequency of the sinusoidal motion (adjust as needed)

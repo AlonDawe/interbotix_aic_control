@@ -51,9 +51,9 @@ private:
   // Beliefs about the states and their derivatives mu, mu', mu'', column vectors of 7 elements
   Eigen::Matrix<double, 5, 1> jointPos, jointVel;
   // Desired robot's states, column vector of 7 elements
-  Eigen::Matrix<double, 5, 1> mu_d, mu_p_d, error, error_p, se, k_c_dot, k_c_dot_prev, k_c, k_c_prev, sigma;
+  Eigen::Matrix<double, 5, 1> mu_d, mu_p_d, error, error_p, se, k_c_dot, k_c_dot_prev, k_c, k_c_prev, sigma, gravity_flag;
   // Control actions,  column vector of 7 elements
-  Eigen::Matrix<double, 5, 1> u;
+  Eigen::Matrix<double, 5, 1> u, u_AFC;
   // Learning rates and integration step for the PID
   double h;
   // Support variable to control the flow of the script

@@ -121,22 +121,31 @@
     for( int i = 0; i < se.rows(); i = i + 1 ) {
       if(u(i) < 885.0 and u(i) > -885.0){
         if(abs(error(i)) < 0.01 and jointVel(i) == 0.0){
-          error(i) = 0.0;
+          se(i) = se(i);
+        }else if (abs(error(i)) < 0.5){
+          se(i) = se(i) + error(i)*h;
         }
-        se(i) = se(i) + error(i)*h;
       } 
       //else: Do not update se(i)
     }
     
     // Prevent integral wind-up
     for( int i = 0; i < se.rows(); i = i + 1 ) {
-      if (se(i) > 500.0) {
-        se(i) = 500.0;
+      if (se(i) > 0.5) {
+        se(i) = 0.5;
       }
-      else if(se(i) < -500.0){
-        se(i) = -500.0;
+      else if(se(i) < -0.5){
+        se(i) = -0.5;
       }
     }
+
+    // Create a stringstream to compose the message
+    //std::stringstream ss;
+    //ss << "Integrator Error: " << se(0);
+
+    // Print warning message
+    //ROS_WARN("%s", ss.str().c_str());
+
     error_p = (mu_p_d - jointVel);
     // Compute control actions
     

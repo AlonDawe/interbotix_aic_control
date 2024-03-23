@@ -102,6 +102,7 @@
 
     // Initialize control actions
     u << 0.0, 0.0, 0.0, 0.0, 0.0;
+    u_AFC << 0.0, 0.0, 0.0, 0.0, 0.0;
 
     error << 0.0, 0.0, 0.0, 0.0, 0.0;
     error_p << 0.0, 0.0, 0.0, 0.0, 0.0;
@@ -111,6 +112,8 @@
     k_c << 0.0, 0.0, 0.0, 0.0, 0.0;
     k_c_prev << 0.0, 0.0, 0.0, 0.0, 0.0;
     sigma << 0.0, 0.0, 0.0, 0.0, 0.0;
+
+    gravity_flag << 0.0, 0.0, 0.0, 0.0, 0.0;
 
     mu_d << 0.0, 0.0, 0.0, 0.0, 0.0;
 
@@ -126,13 +129,29 @@
 
   }
 
+  //Original Article format
+  //void AFC::signum_1(){
+  //  for(int i =0; i<jointVel.rows(); i = i + 1){
+  //    if(abs(error(i)) < 0.01){
+  //      sigma(i) = 0;
+  //    } else if(jointVel(i) > 0.0 || (jointVel(i) == 0 && u(i) > 0.0)){
+  //      sigma(i) = 1;
+  //    } else if(jointVel(i) < 0.0 || (jointVel(i) == 0 && u(i) < 0.0)){
+  //      sigma(i) = -1;
+  //    } else{
+  //      sigma(i) = 0;
+  //    }
+  //  }
+  //}
+
+  //Modified for gravity compensation
   void AFC::signum_1(){
     for(int i =0; i<jointVel.rows(); i = i + 1){
       if(abs(error(i)) < 0.01){
         sigma(i) = 0;
-      } else if(jointVel(i) > 0.0 || (jointVel(i) == 0 && u(i) > 0.0)){
+      } else if(jointVel(i) > 0.0 || (jointVel(i) == 0 && u(i) > Ki(i,i) * abs(se(i)))){
         sigma(i) = 1;
-      } else if(jointVel(i) < 0.0 || (jointVel(i) == 0 && u(i) < 0.0)){
+      } else if(jointVel(i) < 0.0 || (jointVel(i) == 0 && u(i) < - Ki(i,i) * abs(se(i)))){
         sigma(i) = -1;
       } else{
         sigma(i) = 0;
@@ -140,41 +159,107 @@
     }
   }
 
+  //void AFC::signum_1(){
+  //  for(int i =0; i<jointVel.rows(); i = i + 1){
+  //    if(abs(error(i)) < 0.03){
+  //      sigma(i) = 0;
+  //      gravity_flag(i) = 1;
+  //    } else if(jointVel(i) > 0.0){  
+  //      sigma(i) = 1;
+  //      gravity_flag(i) = 2;
+  //    } else if (jointVel(i) == 0.0 && u(i) > 0.0){
+  //      sigma(i) = 1;
+  //      gravity_flag(i) = 3;
+  //    } else if(jointVel(i) < 0.0){ 
+  //      sigma(i) = -1;
+  //      gravity_flag(i) = 2;
+  //    } else if (jointVel(i) == 0.0 && u(i) < 0.0){
+  //      sigma(i) = -1;
+  //      gravity_flag(i) = 3;
+  //    } else{
+  //      sigma(i) = 0;
+  //      gravity_flag(i) = 0;
+  //    }
+  //  }
+  //}
+
+  //New attempt with PID
+  //void AFC::signum_1(){
+  //  for(int i =0; i<jointVel.rows(); i = i + 1){
+  //    if(abs(error(i)) < 0.01){
+  //      sigma(i) = 0;
+  //    } else if(jointVel(i) > 0.0 || (jointVel(i) == 0 && u(i) > 590* (Ki(i,i) * se(i)))){
+  //      sigma(i) = 1;
+  //    } else if(jointVel(i) < 0.0 || (jointVel(i) == 0 && u(i) < 590* (Ki(i,i) * se(i)))){
+  //      sigma(i) = -1;
+  //    } else{
+  //      sigma(i) = 0;
+  //    }
+  //  }
+  //}
+
   void   AFC::computeActions(){
     //AFC::adjust_learning_rate();
     
     error = (mu_d - jointPos);
     for( int i = 0; i < error.rows(); i = i + 1 ) {
-      if( abs(error(i)) < 0.1 ){
+      if(abs(error(i)) < 0.01){
           se(i) = se(i);
-      } else{
+      }else if (abs(error(i)) < 0.5){
           se(i) = se(i) + error(i)*h;
       }
     }
+
+    //std::stringstream ss;
+    //ss << "Integrator Error: " << se(3);
+
+    // Print warning message
+    //ROS_WARN("%s", ss.str().c_str());
     
 
     // Prevent integral wind-up
     for( int i = 0; i < se.rows(); i = i + 1 ) {
-      if (se(i) > 500.0) {
-        se(i) = 500.0;
+      if (se(i) > 0.5) {
+        se(i) = 0.5;
       }
-      else if(se(i) < -500.0){
-        se(i) = -500.0;
+      else if(se(i) < -0.5){
+        se(i) = -0.5;
       }
     }
     error_p = (mu_p_d - jointVel);
     // Compute control actions
     
     u = 590* (Kp * error + Kd * error_p + Ki * se);
-
+    //u = 590* (Kp * error + Kd * error_p);
     AFC::signum_1();
 
+    //if (gravity_flag(3) == 0){
     k_c_dot = (P * sigma).cwiseProduct((error_p + lambda*error));
     k_c = k_c_prev + h/2 * k_c_dot_prev + h/2 * k_c_dot; 
     k_c_dot_prev = k_c_dot;
-    k_c_prev = k_c;
-
+    k_c_prev = k_c; 
+    //}
     u = u + 590*k_c.cwiseProduct(sigma);
+    //if (sigma(3) == 0){
+    //  u = u ;//+ Ki * se;
+    //} else {
+    //  u = u + 590*k_c.cwiseProduct(sigma);
+    //}
+
+
+    
+
+    //if (gravity_flag(3) == 0){
+    //  u = u + 590*k_c.cwiseProduct(sigma);
+    //  u_AFC = 590*k_c.cwiseProduct(sigma);
+    //} else if(gravity_flag(3) == 2){
+    //  u = u + 590*k_c.cwiseProduct(sigma);
+    //  u_AFC = 590*k_c.cwiseProduct(sigma);
+    //}else if(gravity_flag(3) == 1){
+    //  u = u + u_AFC;
+    //} else if(gravity_flag(3) == 3){
+    //  u = u + 590*k_c.cwiseProduct(sigma);
+    //}
 
     for( int i = 0; i < u.rows(); i = i + 1 ) {
       if (u(i) > 885.0 ){
@@ -234,10 +319,10 @@
 
 
 
-    singlePub.publish(waist_msg);
+    //singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
     //singlePub.publish(wrist_ang_msg);
-    //singlePub.publish(wrist_rot_msg);
+    singlePub.publish(wrist_rot_msg);
 
 
 
@@ -317,10 +402,10 @@
     wrist_rot_msg.name = "wrist_rotate";
     wrist_rot_msg.cmd = u(4);
 
-    //singlePub.publish(waist_msg);
+    singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
     //singlePub.publish(wrist_ang_msg);
-    singlePub.publish(wrist_rot_msg);
+    //singlePub.publish(wrist_rot_msg);
 
     // Set the toques from u and publish
     tau1.data = u(0); tau2.data = u(1); tau3.data = u(2); tau4.data = u(3);

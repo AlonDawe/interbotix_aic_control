@@ -1,19 +1,67 @@
 import rosbag
 import matplotlib.pyplot as plt
 import numpy as np
+import csv
+from matplotlib import rcParams
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes,  mark_inset
+
+# Set font and size to match LaTeX document
+rcParams['font.family'] = 'serif'
+#rcParams['font.serif'] = ['Computer Modern']
+rcParams['font.size'] = 10
+
+def save_to_csv(column_headers, column_data, filename):
+    with open(filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(column_headers)
+        writer.writerow(column_data)
+
+def add_to_csv(column_data, filename):
+    with open(filename, 'a', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        #writer.writerow(column_headers)
+        writer.writerow(column_data)
 
 def ITAE(data, time, ref):
     error = abs(data - ref)
     dt = time[1] - time[0]
+    #print(error * time * dt)
     ITAE = np.sum(error * time * dt)
     return ITAE
 
+def settl_time(data, time, ref):
+    error = abs(data - ref)
+    cnt = 0
+    settling_time = 5.0
+    #print(len(error))
+    #print(len(time))
+    for idx, err in enumerate(error):
+        if idx != 0:
+            if cnt == 3 and err < 0.05:
+                settling_time = time[idx]
+                return settling_time
+            elif cnt < 3 and err < 0.05 and error[idx -1] <= err+0.005 and error[idx -1] >= err-0.005 :
+                cnt += 1
+            else:
+                cnt = 0
+    return settling_time
+
+def RMSE(data, ref):
+    error = data - ref
+    squared_error = error**2
+    #dt = time[1] - time[0]
+    #print(error * time * dt)
+    RMSE = np.sqrt(np.mean(squared_error))
+    return RMSE
+    
+
 # Step Response
-bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/PID_FINAL_I_2024-01-29-22-27-35.bag"
+#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/PID_FINAL_I_2024-01-29-22-27-35.bag"
+bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/PID_CHANGING_I_FINAL_2024-03-04-11-51-00.bag"
 bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/AIC_FINAL_2023-12-12-11-41-35.bag"
 bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/ReAIC_FINAL_2024-01-30-09-16-22.bag"
 bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/AFC_FINAL_2024-01-25-10-40-40.bag"
-
+#bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/AFC_CHANGING_I_FINAL_2024-03-04-12-29-23.bag"
 # Open the bag file
 bag1 = rosbag.Bag(bag_path1)
 bag2 = rosbag.Bag(bag_path2)
@@ -269,7 +317,9 @@ for i in range(4):
             controller_step_7_data[i].append(data[i][index])
 
 controllers_ITAE = np.zeros((7, 4)) 
-controllers_OS = np.zeros((7, 4))             
+controllers_OS = np.zeros((7, 4)) 
+controllers_ST = np.zeros((7, 4))    
+controllers_RMSE = np.zeros((7, 4))            
         
 for step, controller_step_x_data in enumerate(controller_step_data):
     
@@ -288,6 +338,7 @@ for step, controller_step_x_data in enumerate(controller_step_data):
                 controller_step_x_data[index].append(controller_step_x_data[index][-1])
             
     controller_step_time[step] = np.linspace(0.0, steps[step][1] - steps[step][0], max_length, endpoint=False)
+    #print(steps[step][1] - steps[step][0])
     
     #print(controller_step_time[step])
     
@@ -296,10 +347,30 @@ for step, controller_step_x_data in enumerate(controller_step_data):
     ReAIC_ITAE = ITAE(np.array(controller_step_x_data[2]), controller_step_time[step], step_references[step])
     AFC_ITAE = ITAE(np.array(controller_step_x_data[3]), controller_step_time[step], step_references[step])
     
+    PID_ST = settl_time(np.array(controller_step_x_data[0]), controller_step_time[step], step_references[step])
+    AIC_ST = settl_time(np.array(controller_step_x_data[1]), controller_step_time[step], step_references[step])
+    ReAIC_ST = settl_time(np.array(controller_step_x_data[2]), controller_step_time[step], step_references[step])
+    AFC_ST = settl_time(np.array(controller_step_x_data[3]), controller_step_time[step], step_references[step])
+    
+    PID_RMSE = RMSE(np.array(controller_step_x_data[0]), step_references[step])
+    AIC_RMSE = RMSE(np.array(controller_step_x_data[1]), step_references[step])
+    ReAIC_RMSE = RMSE(np.array(controller_step_x_data[2]), step_references[step])
+    AFC_RMSE = RMSE(np.array(controller_step_x_data[3]), step_references[step])
+    
     controllers_ITAE[step, 0] = PID_ITAE
     controllers_ITAE[step, 1] = AIC_ITAE
     controllers_ITAE[step, 2] = ReAIC_ITAE
     controllers_ITAE[step, 3] = AFC_ITAE
+    
+    controllers_ST[step, 0] = PID_ST
+    controllers_ST[step, 1] = AIC_ST
+    controllers_ST[step, 2] = ReAIC_ST
+    controllers_ST[step, 3] = AFC_ST
+    
+    controllers_RMSE[step, 0] = PID_RMSE
+    controllers_RMSE[step, 1] = AIC_RMSE
+    controllers_RMSE[step, 2] = ReAIC_RMSE
+    controllers_RMSE[step, 3] = AFC_RMSE
     
     print("STEP {} Performance Analysis: ".format(step+1))
     print("========================================")
@@ -307,8 +378,13 @@ for step, controller_step_x_data in enumerate(controller_step_data):
     print("AIC ITAE: ", AIC_ITAE)
     print("ReAIC ITAE: ", ReAIC_ITAE)
     print("AFC ITAE: ", AFC_ITAE)
-    
     print("========================================")
+    print("PID ST: ", PID_ST)
+    print("AIC ST: ", AIC_ST)
+    print("ReAIC ST: ", ReAIC_ST)
+    print("AFC ST: ", AFC_ST)
+    print("========================================")
+    
     if step > 1 and step < 6:
         PID_max = np.min(controller_step_x_data[0])
         AIC_max = np.min(controller_step_x_data[1])
@@ -317,7 +393,38 @@ for step, controller_step_x_data in enumerate(controller_step_data):
         controller_max = [PID_max, AIC_max, ReAIC_max, AFC_max]
         
         for controller, max in enumerate(controller_max):
-            max_error = max - step_references[step]
+            
+            stopped = False #check if the joint stopped before going past goal
+            stopped_cnt = 0
+            prev_joint_position = controller_step_x_data[controller][0]
+            original_joint_position = controller_step_x_data[controller][0]
+            for joint_position in controller_step_x_data[controller][1:]:
+                if joint_position <= step_references[step]:
+                    break
+                if joint_position > original_joint_position:
+                    original_joint_position = joint_position
+                if joint_position > controller_step_x_data[controller][0]:
+                    stopped_cnt = 0
+                if joint_position == prev_joint_position and prev_joint_position != original_joint_position: 
+                    stopped_cnt += 1
+                else:
+                    stopped_cnt = 0
+                if joint_position > prev_joint_position and joint_position < original_joint_position:
+                    stopped = True
+                    #print(step, stopped_cnt)
+                    #print(joint_position)
+                    break
+                
+                prev_joint_position = joint_position
+                
+                if stopped_cnt == 3:
+                    stopped = True
+                    break
+                
+            if stopped is False:
+                max_error = max - step_references[step]
+            else:
+                max_error = joint_position - step_references[step]
             if max_error > 0.0:
                 max_error = 0.0
                 OS = 0.0
@@ -331,6 +438,8 @@ for step, controller_step_x_data in enumerate(controller_step_data):
             controllers_OS[step, controller] = OS
             
             
+            
+            
     else:
         PID_max = np.max(controller_step_x_data[0])
         AIC_max = np.max(controller_step_x_data[1])
@@ -339,7 +448,35 @@ for step, controller_step_x_data in enumerate(controller_step_data):
         controller_max = [PID_max, AIC_max, ReAIC_max, AFC_max]
         
         for controller, max in enumerate(controller_max):
-            max_error = max - step_references[step]
+            
+            stopped = False #check if the joint stopped before going past goal
+            stopped_cnt = 0
+            prev_joint_position = controller_step_x_data[controller][0]
+            original_joint_position = controller_step_x_data[controller][0]
+            for joint_position in controller_step_x_data[controller][1:]:
+                if joint_position >= step_references[step]:
+                    break
+                if joint_position < original_joint_position:
+                    original_joint_position = joint_position
+                if joint_position < controller_step_x_data[controller][0]:
+                    stopped_cnt = 0
+                if joint_position == prev_joint_position and prev_joint_position != original_joint_position:
+                    stopped_cnt += 1
+                elif joint_position != prev_joint_position:
+                    stopped_cnt = 0
+                if joint_position < prev_joint_position and joint_position > original_joint_position:
+                    stopped = True
+                    break
+                
+                prev_joint_position = joint_position
+                
+                if stopped_cnt == 3:
+                    stopped = True
+                    break
+            if stopped is False:
+                max_error = max - step_references[step]
+            else: 
+                max_error = joint_position - step_references[step]
             if max_error < 0.0:
                 max_error = 0.0
                 OS = 0.0
@@ -350,18 +487,79 @@ for step, controller_step_x_data in enumerate(controller_step_data):
             print("{} OS: {}".format(controllers[controller], OS))
             
             controllers_OS[step, controller] = OS
+            
     print("\n")
     
 
-column_ITAE_variances = np.var(controllers_ITAE, axis=0) 
-column_OS_variances = np.var(controllers_OS, axis=0)
+# Column headers
+column_headers = ["ITAE", "ST", "OS", "ITAE", "ST", "OS", "ITAE", "ST", "OS", "ITAE", "ST", "OS", "ITAE", "ST", "OS", "ITAE", "ST", "OS", "ITAE", "ST", "OS"]
+
+# Data for each column
+#controllers_ITAE = [controllers_ITAE[0, 0], "controllers_ITAE[0, 1]", "controllers_ITAE[0, 2]", "controllers_ITAE[0, 3]"]
+#controllers_ST = ["controllers_ST[0, 0]", "controllers_ST[0, 1]", "controllers_ST[0, 2]", "controllers_ST[0, 3]"]
+#controllers_OS = ["controllers_OS[0, 0]", "controllers_OS[0, 1]", "controllers_OS[0, 2]", "controllers_OS[0, 3]"]
+
+# Save to CSV file
+#save_to_csv(column_headers, [controllers_ITAE[0,0], controllers_ST[0,0], controllers_OS[0,0], 
+#                             controllers_ITAE[1,0], controllers_ST[1,0], controllers_OS[1,0],
+#                             controllers_ITAE[2,0], controllers_ST[2,0], controllers_OS[2,0],
+#                             controllers_ITAE[3,0], controllers_ST[3,0], controllers_OS[3,0],
+#                             controllers_ITAE[4,0], controllers_ST[4,0], controllers_OS[4,0],
+#                             controllers_ITAE[5,0], controllers_ST[5,0], controllers_OS[5,0],
+#                             controllers_ITAE[6,0], controllers_ST[6,0], controllers_OS[6,0]], "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/output.csv")
+
+#for i in range(1, 4):
+#    add_to_csv([controllers_ITAE[0,i], controllers_ST[0,i], controllers_OS[0,i], 
+#                             controllers_ITAE[1,i], controllers_ST[1,i], controllers_OS[1,i],
+#                             controllers_ITAE[2,i], controllers_ST[2,i], controllers_OS[2,i],
+#                             controllers_ITAE[3,i], controllers_ST[3,i], controllers_OS[3,i],
+#                             controllers_ITAE[4,i], controllers_ST[4,i], controllers_OS[4,i],
+#                             controllers_ITAE[5,i], controllers_ST[5,i], controllers_OS[5,i],
+#                             controllers_ITAE[6,i], controllers_ST[6,i], controllers_OS[6,i]], "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/output.csv")
+   
+   
+column_ITAE_variances = np.std(controllers_ITAE, axis=0) 
+column_ST_variances = np.std(controllers_ST, axis=0) 
+column_OS_variances = np.std(controllers_OS, axis=0)
+
+column_ITAE_mean = np.mean(controllers_ITAE, axis=0) 
+column_ST_mean = np.mean(controllers_ST, axis=0) 
+column_OS_mean = np.mean(controllers_OS, axis=0)
+    
+#save_to_csv(["mean", "std", "mean", "std", "mean", "std"], [column_ITAE_mean[0], column_ITAE_variances[0], 
+#                                                            column_ST_mean[0], column_ST_variances[0], 
+#                                                            column_OS_mean[0], column_OS_variances[0]], "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/mean_std.csv")
+#
+#for i in range(1, 4):
+#    add_to_csv([column_ITAE_mean[i], column_ITAE_variances[i], 
+#                column_ST_mean[i], column_ST_variances[i], 
+#                column_OS_mean[i], column_OS_variances[i]], "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_rot/mean_std.csv")
+
+
+#column_ITAE_variances = np.std(controllers_ITAE, axis=0) 
+#column_ST_variances = np.std(controllers_ST, axis=0) 
+#column_OS_variances = np.std(controllers_OS, axis=0)
+
+#column_ITAE_mean = np.mean(controllers_ITAE, axis=0) 
+#column_ST_mean = np.mean(controllers_ST, axis=0) 
+#column_OS_mean = np.mean(controllers_OS, axis=0)
+
 print("\n")
 print("ITAE Variances: ", column_ITAE_variances)
+print("ST Variances: ", column_ST_variances)
 print("OS Variances: ", column_OS_variances)
+
+print("\n")
+
+print("ITAE Mean: ", column_ITAE_mean)
+print("ST Mean: ", column_ST_mean)
+print("OS Mean: ", column_OS_mean)
  
 
 REF_timestamps = timestamps_mu_d
 REF_datavalues =  data_values_mu_d
+
+
 
 #print(REF_timestamps)
 
@@ -384,29 +582,48 @@ plt.title('Waist Angle Step Responses')
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 
 # Add a title to the entire figure
-plt.suptitle('Controller Waist Angle Step Responses')
+#plt.suptitle('Wrist Rotation Step Responses')
 
 # Plot joint position on the first subplot
-ax1.plot(time[0], data[0], '-', label='PID Joint Position (rad)')
-ax1.plot(time[1], data[1], '-', label='AIC Joint Position (rad)')
-ax1.plot(time[2], data[2], '-', label='ReAIC Joint Position (rad)')
-ax1.plot(time[3], data[3], '-', label='AFC Joint Position (rad)')
-ax1.plot(REF_timestamps, REF_datavalues, 'k-', label='Desired Position')
-ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
-ax1.set_ylabel('Joint Position (rad)')
-ax1.legend()
+ax1.step(time[0], data[0], '-', label='PID')
+ax1.step(time[1], data[1], '-', label='AIC')
+ax1.step(time[2], data[2], '-', label='ReAIC')
+ax1.step(time[3], data[3], '-', label='AFC')
+ax1.step(REF_timestamps, REF_datavalues, color='k', linestyle='--', label='$\mu_{g}$', zorder=0)
+#ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
+ax1.set_ylabel('Joint Angle (rad)')
+ax1.legend(ncol=5, fontsize='small', frameon=False, loc='upper center', bbox_to_anchor =(0.5, 1.2))
 ax1.grid(True)  # Turn on the grid for the first subplot
+ax1.set_xlim(0, 30)
 
 # Plot control signal on the second subplot
-ax2.plot(control_time[0], control_signal[0], '-', label='PID Control Signal (v)')
-ax2.plot(control_time[1], control_signal[1], '-', label='AIC Control Signal (v)')
-ax2.plot(control_time[2], control_signal[2], '-', label='ReAIC Control Signal (v)')
-ax2.plot(control_time[3], control_signal[3], '-', label='AFC Control Signal (v)')
+ax2.step(control_time[0], control_signal[0], '-')#, label='PID Control Signal (v)')
+ax2.step(control_time[1], control_signal[1], '-')#, label='AIC Control Signal (v)')
+ax2.step(control_time[2], control_signal[2], '-')#, label='ReAIC Control Signal (v)')
+ax2.step(control_time[3], control_signal[3], '-')#, label='AFC Control Signal (v)')
 ax2.set_xlabel('Time (s)')
-ax2.set_ylabel('Control Signal (v)')
-ax2.legend()
+ax2.set_ylabel('Control Signal (V)')
+#ax2.legend()
 ax2.grid(True)  # Turn on the grid for the first subplot
+ax2.set_xlim(0, 30)
 
+# Create inset axes for the zoomed-in view
+axins = inset_axes(ax1, width="45%", height="45%", loc='upper right')
+axins.step(time[0], data[0], '-')
+axins.step(time[1], data[1], '-')
+axins.step(time[2], data[2], '-')
+axins.step(time[3], data[3], '-')
+axins.step(REF_timestamps, REF_datavalues, 'k', linestyle='--', zorder = 0)
+axins.set_xlim(13, 18)
+axins.set_ylim(-0.35, 0.35)
+plt.xticks(visible=False)
+plt.yticks(visible=False)
+
+ax1.indicate_inset_zoom(axins, edgecolor="black")
+# Mark the inset area and draw connecting lines
+mark_inset(ax1, axins, loc1=2, loc2=4, fc="none", ec="0.7")
+
+#fig.savefig('/home/alon/Documents/thesis/Latex Experiment Graphs/wrist_rotation_test_new.pdf')
 
 for i in range(4):
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
@@ -434,7 +651,7 @@ for i in range(4):
 
 step_x = [1, 2, 3, 4, 5, 6, 7]
 
-fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True)
 # Add a title to the entire figure
 plt.suptitle('Controller Performance Analysis')
 
@@ -458,6 +675,15 @@ ax2.set_xlabel('Step')
 ax2.set_ylabel('Controller Overshoot (%)')
 ax2.legend()
 ax2.grid(True)  # Turn on the grid for the first subplot
+
+ax3.plot(step_x, controllers_ST[:, 0], '-o', label='PID')
+ax3.plot(step_x, controllers_ST[:, 1], '-o', label='AIC')
+ax3.plot(step_x, controllers_ST[:, 2], '-o', label='ReAIC')
+ax3.plot(step_x, controllers_ST[:, 3], '-o', label='AFC')
+ax3.set_xlabel('Step')
+ax3.set_ylabel('Controller Settling Time (s)')
+ax3.legend()
+ax3.grid(True)  # Turn on the grid for the first subplot
 
 # Show the plot
 plt.show()

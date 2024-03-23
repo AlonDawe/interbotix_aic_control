@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D, art3d
 from matplotlib.patches import Circle
 from matplotlib import rcParams
+from matplotlib import cm
 
 
 # Set font and size to match LaTeX document
@@ -52,7 +53,7 @@ stacked_arrays = np.stack(loaded_arrays)
 
 # Calculate the mean across the first axis (which represents the different steps)
 averaged_array = np.mean(stacked_arrays, axis=0)
-print(averaged_array)
+#print(averaged_array)
 # Calculate the variance across the first axis (which represents the different steps)
 final_variance = np.var(stacked_arrays, axis=0)
 # Calculate the standard deviation across the first axis (which represents the different steps)
@@ -148,35 +149,63 @@ for i, ax in enumerate(axes):
 #fig2.suptitle('Variance Performance Metric Analysis', fontsize=16)
 #fig2.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/std_performance_metrics.pdf')
 
-performance_metric = ["ITAE Score", "Settling Time ($sec$)", "Overshoot ($\%$)"]
+performance_metric = ["ITAE", "Settling Time (s)", "Overshoot (%)"]
 performance_metric_name = ["ITAE_Score", "Settling_Time", "Overshoot"]
+plt.rcParams['grid.color'] = "whitesmoke"
 for i in range(3):
 
     # Create a 3D plot for loaded_array[:, :, 0]
     fig = plt.figure(figsize=(3.5, 3.5))
     ax = fig.add_subplot(111, projection='3d')
-
+    # Get rid of the panes
+    ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    
+    
+    
+    #ax.grid(False)
+    
+    ax.grid(alpha = 0.9)
+    
+    norm = plt.Normalize(averaged_array[:, :, i].min(), averaged_array[:, :, i].max())
+    colors = cm.copper(norm(averaged_array[:, :, i]))
+    rcount, ccount, _ = colors.shape
+    
     # Plot the 3D surface
-    ax.plot_surface(kp_mesh, ka_mesh, averaged_array[:, :, i], cmap='viridis')
-
+    surf = ax.plot_surface(kp_mesh, ka_mesh, averaged_array[:, :, i], rcount=rcount, ccount=ccount,
+                       facecolors=colors, shade=False, zorder=0)
+    surf.set_facecolor((0,0,0,0))
+    #ax.grid(color='whitesmoke')
+    #ax.plot_wireframe(kp_mesh, ka_mesh, averaged_array[:, :, i], cmap='viridis')
     # Set labels
+    if i != 2:
+        ax.scatter((min_indices[i][1]+1), (min_indices[i][0]+1), min_values[i], marker='o', c='r', s=35, zorder=1)
     ax.set_xlabel('$\kappa_{a}$')
     ax.set_ylabel('$\mathcal{K}_{p}$')
     ax.zaxis.set_rotate_label(False)  # disable automatic rotation
     ax.set_zlabel(performance_metric[i], rotation=90)
     #ax.set_title(performance_metric[i])
     ax.view_init(elev=30, azim=15)  # Adjust the azimuth angle
-    fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/mean_performance_metrics_'+performance_metric_name[i]+'.pdf')
+    fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/mean_performance_metrics_'+performance_metric_name[i]+'_new'+'.pdf')
     
 for i in range(3):
 
     # Create a 3D plot for loaded_array[:, :, 0]
     fig = plt.figure(figsize=(3.5, 3.5))
     ax = fig.add_subplot(111, projection='3d')
+    ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+    norm = plt.Normalize(final_std[:, :, i].min(), final_std[:, :, i].max())
+    colors = cm.copper(norm(final_std[:, :, i]))
+    rcount, ccount, _ = colors.shape
 
     # Plot the 3D surface
-    ax.plot_surface(kp_mesh, ka_mesh, final_std[:, :, i], cmap='viridis')
-
+    surf = ax.plot_surface(kp_mesh, ka_mesh, final_std[:, :, i], rcount=rcount, ccount=ccount,
+                       facecolors=colors, shade=False, zorder=0)
+    surf.set_facecolor((0,0,0,0))
+    #ax.plot_wireframe(kp_mesh, ka_mesh, final_std[:, :, i], cmap='viridis')
     # Set labels
     ax.set_xlabel('$\kappa_{a}$')
     ax.set_ylabel('$\mathcal{K}_{p}$')
@@ -184,7 +213,7 @@ for i in range(3):
     ax.set_zlabel(performance_metric[i], rotation=90)
     #ax.set_title(performance_metric[i])
     ax.view_init(elev=30, azim=15)  # Adjust the azimuth angle
-    fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/std_performance_metrics_'+performance_metric_name[i]+'.pdf')
+    fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/std_performance_metrics_'+performance_metric_name[i]+'_new'+'.pdf')
 
 # Show the plot
 plt.show()

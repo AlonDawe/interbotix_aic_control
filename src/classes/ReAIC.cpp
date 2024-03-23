@@ -75,11 +75,11 @@
 
     // Save joint values
 
-    std::vector<double> noise = ReAIC::generateNormalRandomNumbers(0.0, 0.1);
+    //std::vector<double> noise = ReAIC::generateNormalRandomNumbers(0.0, 0.1);
 
     for( int i = 0; i < 5; i++ ) {
-      jointPos(i) = msg->position[i] + noise[i];
-      jointVel(i) = msg->velocity[i] + noise[i];
+      jointPos(i) = msg->position[i];// + noise[i];
+      jointVel(i) = msg->velocity[i];// + noise[i];
     }
     //std::stringstream ss;
     //ss << "Noise: " << noise[4];
@@ -299,10 +299,10 @@
 
 
 
-    //singlePub.publish(waist_msg);
+    singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
     //singlePub.publish(wrist_ang_msg);
-    singlePub.publish(wrist_rot_msg);
+    //singlePub.publish(wrist_rot_msg);
 
     a.cmd = {waist_msg.cmd, shoulder_msg.cmd, elbow_msg.cmd, wrist_ang_msg.cmd, wrist_rot_msg.cmd};
 

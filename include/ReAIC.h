@@ -1,16 +1,17 @@
 /*
- * File:   AIC.h
- * Author: Corrado Pezzato, TU Delft, DCSC
- *
- * Created on April 14th, 2020
- *
- * Class to perform active inference control of the 7DOF Franka Emika Panda robot.
- *
- * This class takes care of everything, it subscribes to the topics containing
- * the sensory input and it perfoms free-energy minimization using gradient descent
- * updating the beliefs about the rosbot's states (i.e. joint values) and computing
- * the control actions. The control is in joint space.
- *
+ * File: ReAIC.h
+
+ * Author: Alon Dawe
+ * 
+ * Created: 13th October, 2023
+ * 
+ * Description: Class to perform Re-Active Inference Control of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
+ * 
+ * Original Author: Corrado Pezzato, TU Delft, DCSC 
+ * (https://github.com/cpezzato/panda_simulation/blob/master/panda_control/include/AIC.h)
+ * The original author implemented an AIC controller to control a 7-DOF Franka Emika Panda robot arm.
+ * The code in this file originated from this source, and was adapted to suit the control of a 5-DOF 
+ * Interbotix PincherX 150 robotic manipulator with a different control algorithm. 
  */
 
 #ifndef ReAIC_H
@@ -32,7 +33,7 @@
 #include <random>
 #include <chrono>
 
-// Class AIC to hanle the subscribers and the publishers for the active inference controller
+// Class ReAIC to hanle the subscribers and the publishers for the Re-Active Inference Controller
 class ReAIC
 {
 public:
@@ -54,9 +55,9 @@ public:
   void setGoal(std::vector<double> desiredPos);
   // get methods for sensory prediction errors
   std_msgs::Float64MultiArray getSPE();
-
+  // Gaussian noise function
   std::vector<double> generateNormalRandomNumbers(double mean, double stddev);
-
+  // Function to stop controller once witin a certain error tolerance
   void adjust_learning_rate(); 
 
 private:
@@ -71,7 +72,7 @@ private:
   Eigen::Matrix<double, 5, 1> mu_d, mu_p_d, error;
   // Control actions,  column vector of 7 elements
   Eigen::Matrix<double, 5, 1> u;
-  // Learning rates and integration step for the AIC
+  // Learning rates and integration step for the ReAIC
   double k_mu, k_a, h, Kp, k_mu_original;
   // Sensory prediction errors
   double SPEq, SPEdq, SPEmu_p, SPEmu_pp, SPEq_d, SPEdq_d;
@@ -79,9 +80,9 @@ private:
   int dataReceived;
   // ROS related Variables, node handle
   ros::NodeHandle nh;
-  // Publishers for joint torques to the topics /panda_joint*_controller/command, and the free-energy
+  // Publishers
   ros::Publisher singlePub, groupPub, tauPub1, tauPub2, tauPub3, tauPub4, tauPub5, tauPub6, tauPub7, IFE_pub;
-  // Subscriber for proprioceptive sensors (i.e. from joint_states) and camera (i.e. aruco_single/pose)
+  // Subscriber for proprioceptive sensors (i.e. from joint_states)
   ros::Subscriber sensorSub;
   // Support variables to contain the torques for the joints
   std_msgs::Float64 tau1, tau2, tau3, tau4, tau5, tau6, tau7, F;

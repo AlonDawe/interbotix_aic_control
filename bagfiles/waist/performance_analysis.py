@@ -4,11 +4,17 @@ import numpy as np
 from matplotlib import rcParams
 import csv
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes,  mark_inset
+from scipy.io import loadmat
 
 # Set font and size to match LaTeX document
-rcParams['font.family'] = 'serif'
+#rcParams['font.family'] = 'serif'
 #rcParams['font.serif'] = ['Computer Modern']
-rcParams['font.size'] = 10
+#rcParams['font.size'] = 10
+rcParams['font.family'] = 'serif'
+rcParams['font.serif'] = ['cmr10']
+rcParams['font.size'] = 14
+#rcParams['axes.unicode_minus'] = False
+rcParams['axes.formatter.use_mathtext'] = True
 
 def save_to_csv(column_headers, column_data, filename):
     with open(filename, 'w', newline='') as csvfile:
@@ -570,7 +576,7 @@ ax1.step(time[3], data[3], '-', label='AFC')
 ax1.step(REF_timestamps, REF_datavalues, color='k', linestyle='--', label='$\mu_{g}$', zorder=0)
 #ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
 ax1.set_ylabel('Joint Angle (rad)')
-ax1.legend(ncol=5, fontsize='small', frameon=False, loc='upper center', bbox_to_anchor =(0.5, 1.2)) #bbox_to_anchor =(0.5,-0.22),
+ax1.legend(ncol=5, fontsize='small', frameon=False, loc='upper center', bbox_to_anchor =(0.5, 1.28)) #bbox_to_anchor =(0.5,-0.22),
 ax1.grid(True)  # Turn on the grid for the first subplot
 ax1.set_xlim(0, 30)
 
@@ -664,6 +670,41 @@ ax3.set_xlabel('Step')
 ax3.set_ylabel('Controller Settling Time (s)')
 ax3.legend()
 ax3.grid(True)  # Turn on the grid for the first subplot
+
+
+
+
+### MATLAB PLOT ###
+
+x_step = loadmat('step.mat')
+
+y_step = np.array(x_step['h'][:, 0])
+t_step = np.arange(0, 5.01, 0.01)
+
+fig8, (ax1) = plt.subplots(1, 1, sharex=True)
+
+# Add a title to the entire figure
+#plt.suptitle('Waist Rotation Responses')
+#plt.suptitle('Waist Rotation Responses with Additional Friction')
+
+
+subt = np.ones(len(time[2]))
+subt2 = np.ones(len(REF_timestamps))
+#print(len(subt))
+
+# Plot joint position on the first subplot
+ax1.step(t_step, y_step, '-', label='G(s)')
+ax1.step(time[2]-3*subt, data[2], '-', label='Waist Joint')
+ax1.step(REF_timestamps-3*subt2, REF_datavalues, color='k', linestyle='--', label='$\mu_{g}$', zorder=0)
+#ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
+ax1.set_ylabel('Joint Angle (rad)')
+ax1.set_xlabel('Time (s)')
+ax1.legend(ncol=3, fontsize='small', frameon=False, loc='upper center', bbox_to_anchor =(0.5, 1.12))
+ax1.grid(True)  # Turn on the grid for the first subplot
+ax1.set_xlim(0, 3)
+ax1.set_ylim(0, 1)
+#fig8.savefig('/home/alon/Documents/thesis/Latex Experiment Graphs/Gs_vs_real.pdf')
+
 
 # Show the plot
 plt.show()

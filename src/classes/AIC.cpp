@@ -1,12 +1,17 @@
 /*
- * File:   AIC.cpp
- * Author: Corrado Pezzato, TU Delft, DCSC
- *
- * Created on April 14th, 2019
- *
- * Class to perform active inference control of the 7DOF Franka Emika Panda robot.
- * Definition of the methods contained in AIC.h
- *
+ * File: AIC.cpp
+
+ * Author: Alon Dawe
+ * 
+ * Created: 13th October, 2023
+ * 
+ * Description: Class to perform Re-Active Inference Control of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
+ * 
+ * Original Author: Corrado Pezzato, TU Delft, DCSC 
+ * (https://github.com/cpezzato/panda_simulation/blob/master/panda_control/src/classes/AIC.cpp)
+ * The original author implemented an AIC controller to control a 7-DOF Franka Emika Panda robot arm.
+ * The code in this file originated from this source, and was adapted to suit the control of a 5-DOF 
+ * Interbotix PincherX 150 robotic manipulator with a different control algorithm. 
  */
 
 #include "AIC.h"
@@ -21,12 +26,11 @@
       tauPub1 = nh.advertise<std_msgs::Float64>("/px150/waist_controller/command", 20);
       tauPub2 = nh.advertise<std_msgs::Float64>("/px150/shoulder_controller/command", 20);
       tauPub3 = nh.advertise<std_msgs::Float64>("/px150/elbow_controller/command", 20);
-      //tauPub4 = nh.advertise<std_msgs::Float64>("/px150/forearm_roll_controller/command", 20);
       tauPub4 = nh.advertise<std_msgs::Float64>("/px150/wrist_angle_controller/command", 20);
       tauPub5 = nh.advertise<std_msgs::Float64>("/px150/wrist_rotate_controller/command", 20);
-      
       //tauPub6 = nh.advertise<std_msgs::Float64>("/px150/Left_finger_controller/command", 20);
       //tauPub7 = nh.advertise<std_msgs::Float64>("/px150/right_finger_controller/command", 20);
+      
       sensorSub = nh.subscribe("/px150/joint_states", 1, &AIC::jointStatesCallback, this);
       // Publisher for the free-energy and sensory prediction errors
       IFE_pub = nh.advertise<std_msgs::Float64>("px150_free_energy", 10);
@@ -79,17 +83,6 @@
     // Support variable
     dataReceived = 0;
 
-    // Variances associated with the beliefs and the sensory inputs
-    //var_mu = 10;//5.0;
-    //var_muprime = 20;//10.0;
-    //var_q = 1;//1;
-    //var_qdot = 1;//1;
-
-    // Learning rates for the gradient descent (found that a ratio of 60 works good)
-
-    //k_mu = 100;
-    //k_a = 100;  
-
     // Precision matrices (first set them to zero then populate the diagonal)
     SigmaP_yq0 = Eigen::Matrix<double, 5, 5>::Zero();
     SigmaP_yq1 = Eigen::Matrix<double, 5, 5>::Zero();
@@ -97,8 +90,10 @@
     SigmaP_muprime = Eigen::Matrix<double, 5, 5>::Zero();
 
     k_a_adapt = Eigen::Matrix<double, 5, 5>::Zero();
+
     // Begin Tuning parameters of AIC
     //---------------------------------------------------------------
+
     // Variances associated with the beliefs and the sensory inputs
     ROS_INFO("Setting AIC parameters from parameter space");
     nh.getParam("var_mu", var_mu);
@@ -196,46 +191,15 @@
       }
     }
 
-    ROS_INFO_STREAM("Sending random velocity command:"
-      << " u= " << u(0) << " " << u(1) << " " << u(2) << " " << u(3) << " " << u(4));
-    
     interbotix_xs_msgs::JointGroupCommand a;
-    a.name = "arm";
-    //std::cout << "Values of u:" << std::endl;
-    //for (int i = 0; i < u.rows(); ++i) {
-    //    std::cout << "u(" << i << ") = " << u(i) << std::endl;
-    //}
-    //Eigen::Map<Eigen::Matrix<float, 5, 1>> u_float(a.cmd.data());
-    //u_float = u.cast<float>();
-
-    //float32 u0 = u(0);
-    //float32 u1 = u(1);
-    //float32 u2 = u(2);
-    //float32 u3 = u(3);
-    //float32 u4 = u(4);
-    //a.cmd = {u[0], u[1], u[2], u[3], u[4]};
 
     interbotix_xs_msgs::JointSingleCommand waist_msg;
     interbotix_xs_msgs::JointSingleCommand shoulder_msg;
     interbotix_xs_msgs::JointSingleCommand elbow_msg;
-    //interbotix_xs_msgs::JointSingleCommand forearm_roll_msg;
     interbotix_xs_msgs::JointSingleCommand wrist_ang_msg;
     interbotix_xs_msgs::JointSingleCommand wrist_rot_msg;
 
-
-    //a.name = "arm";
-    //a.cmd.push_back(u(0));
-    //a.cmd.push_back(u(1));
-    //a.cmd.push_back(u(2));
-    //a.cmd.push_back(u(3));
-    //a.cmd.push_back(u(4));
-    //a.cmd.push_back(u(5));
-    //a.cmd.push_back(0);
-    //a.cmd.push_back(0);
-    //a.cmd.push_back(0);
-    //a.cmd.push_back(0);waist_msg
-    //a.cmd.push_back(0.0);
-
+    a.name = "arm";
 
     waist_msg.name = "waist";
     waist_msg.cmd = u(0);
@@ -245,9 +209,6 @@
 
     elbow_msg.name = "elbow";
     elbow_msg.cmd = u(2);
-
-    //forearm_roll_msg.name = "forearm_roll";
-    //forearm_roll_msg.cmd = u(3);
 
     wrist_ang_msg.name = "wrist_angle";
     wrist_ang_msg.cmd = u(3);
@@ -264,17 +225,9 @@
     //singlePub.publish(wrist_rot_msg);
 
 
-
-
-
-    //ROS_INFO_STREAM("Sending random velocity command:"
-    //  << " Name= " << a.name
-    //  << " Cmd= " << a.cmd[0] << " " << a.cmd[1] << " " << a.cmd[2] << " " << a.cmd[3] << " " << a.cmd[4]);
-    
     // Publish the message.
     //groupPub.publish(a);
     
-
     // Set the toques from u and publish
     tau1.data = u(0); tau2.data = u(1); tau3.data = u(2); tau4.data = u(3);
     tau5.data = u(4); //tau6.data = u(5); //tau7.data = u(6);

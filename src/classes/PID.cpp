@@ -1,5 +1,17 @@
 /*
- * File:   PID.cpp
+ * File: PID.cpp
+
+ * Author: Alon Dawe
+ * 
+ * Created: 13th October, 2023
+ * 
+ * Description: Class to perform PID Control of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
+ * 
+ * Original Author: Corrado Pezzato, TU Delft, DCSC 
+ * (https://github.com/cpezzato/panda_simulation/blob/master/panda_control/src/classes/AIC.cpp)
+ * The original author implemented an AIC controller to control a 7-DOF Franka Emika Panda robot arm.
+ * The code in this file originated from this source, and was adapted to suit the control of a 5-DOF 
+ * Interbotix PincherX 150 robotic manipulator with a different control algorithm. 
  */
 
 #include "PID.h"
@@ -14,12 +26,11 @@
       tauPub1 = nh.advertise<std_msgs::Float64>("/px150/waist_controller/command", 20);
       tauPub2 = nh.advertise<std_msgs::Float64>("/px150/shoulder_controller/command", 20);
       tauPub3 = nh.advertise<std_msgs::Float64>("/px150/elbow_controller/command", 20);
-      //tauPub4 = nh.advertise<std_msgs::Float64>("/px150/forearm_roll_controller/command", 20);
       tauPub4 = nh.advertise<std_msgs::Float64>("/px150/wrist_angle_controller/command", 20);
       tauPub5 = nh.advertise<std_msgs::Float64>("/px150/wrist_rotate_controller/command", 20);
-      
       //tauPub6 = nh.advertise<std_msgs::Float64>("/px150/Left_finger_controller/command", 20);
       //tauPub7 = nh.advertise<std_msgs::Float64>("/px150/right_finger_controller/command", 20);
+
       sensorSub = nh.subscribe("/px150/joint_states", 1, &PID::jointStatesCallback, this);
       mu_desired_pub = nh.advertise<std_msgs::Float64MultiArray>("mu_desired", 10);
     // Initialize the variables for thr PID
@@ -52,9 +63,6 @@
     if (dataReceived == 0){
       // Track the fact that the encoders published
       dataReceived = 1;
-      // The first time we retrieve the position we define the initial beliefs about the states
-      //mu = jointPos;
-      //mu_p = jointVel;
     }
   }
 
@@ -63,26 +71,16 @@
     // Support variable
     dataReceived = 0;
 
-    // Variances associated with the beliefs and the sensory inputs
-    //var_mu = 10;//5.0;
-    //var_muprime = 20;//10.0;
-    //var_q = 1;//1;
-    //var_qdot = 1;//1;
-
-    // Learning rates for the gradient descent (found that a ratio of 60 works good)
-
-    //k_mu = 100;
-    //k_a = 100;  
-
     // Precision matrices (first set them to zero then populate the diagonal)
     Kp = Eigen::Matrix<double, 5, 5>::Zero();
     Kd = Eigen::Matrix<double, 5, 5>::Zero();
     Ki = Eigen::Matrix<double, 5, 5>::Zero();
   
-    // Begin Tuning parameters of AIC
+    // Begin Tuning parameters of PID
     //---------------------------------------------------------------
+    
     // Variances associated with the beliefs and the sensory inputs
-    ROS_INFO("Setting AIC parameters from parameter space");
+    ROS_INFO("Setting PID parameters from parameter space");
     nh.getParam("k_p", k_p);
     nh.getParam("k_d", k_d);
     nh.getParam("k_i", k_i);
@@ -100,9 +98,7 @@
     error_p << 0.0, 0.0, 0.0, 0.0, 0.0;
 
     mu_d << 0.0, 0.0, 0.0, 0.0, 0.0;
-
     mu_p_d << 0.0, 0.0, 0.0, 0.0, 0.0;
-
 
     se << 0.0, 0.0, 0.0, 0.0, 0.0;
 
@@ -110,7 +106,6 @@
     h = 0.001;
 
     mu_des.data.resize(5);
-
   }
 
   void   PID::computeActions(){
@@ -139,16 +134,9 @@
       }
     }
 
-    // Create a stringstream to compose the message
-    //std::stringstream ss;
-    //ss << "Integrator Error: " << se(0);
-
-    // Print warning message
-    //ROS_WARN("%s", ss.str().c_str());
-
     error_p = (mu_p_d - jointVel);
+
     // Compute control actions
-    
     u = 590* (Kp * error + Kd * error_p + Ki * se);
 
     for( int i = 0; i < u.rows(); i = i + 1 ) {
@@ -161,32 +149,16 @@
     }
 
     
-    ROS_INFO_STREAM("Sending random velocity command:"
-      << " u= " << u(0) << " " << u(1) << " " << u(2) << " " << u(3) << " " << u(4));
-    
     interbotix_xs_msgs::JointGroupCommand a;
 
     interbotix_xs_msgs::JointSingleCommand waist_msg;
     interbotix_xs_msgs::JointSingleCommand shoulder_msg;
     interbotix_xs_msgs::JointSingleCommand elbow_msg;
-    //interbotix_xs_msgs::JointSingleCommand forearm_roll_msg;
     interbotix_xs_msgs::JointSingleCommand wrist_ang_msg;
     interbotix_xs_msgs::JointSingleCommand wrist_rot_msg;
 
 
     a.name = "arm";
-    a.cmd.push_back(u(0));
-    a.cmd.push_back(u(1));
-    a.cmd.push_back(u(2));
-    a.cmd.push_back(u(3));
-    a.cmd.push_back(u(4));
-    //a.cmd.push_back(u(5));
-    //a.cmd.push_back(0);
-    //a.cmd.push_back(0);
-    //a.cmd.push_back(0);
-    //a.cmd.push_back(0);waist_msg
-    //a.cmd.push_back(0.0);
-
 
     waist_msg.name = "waist";
     waist_msg.cmd = u(0);
@@ -197,31 +169,17 @@
     elbow_msg.name = "elbow";
     elbow_msg.cmd = u(2);
 
-    //forearm_roll_msg.name = "forearm_roll";
-    //forearm_roll_msg.cmd = u(3);
-
     wrist_ang_msg.name = "wrist_angle";
     wrist_ang_msg.cmd = u(3);
 
     wrist_rot_msg.name = "wrist_rotate";
     wrist_rot_msg.cmd = u(4);
 
-
-
-
     //singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
     //singlePub.publish(wrist_ang_msg);
     singlePub.publish(wrist_rot_msg);
 
-
-
-
-
-    //ROS_INFO_STREAM("Sending random velocity command:"
-    //  << " Name= " << a.name
-    //  << " Cmd= " << a.cmd[0] << " " << a.cmd[1] << " " << a.cmd[2] << " " << a.cmd[3] << " " << a.cmd[4]);
-    
     // Publish the message.
     //groupPub.publish(a);
     
@@ -262,17 +220,11 @@
     interbotix_xs_msgs::JointSingleCommand waist_msg;
     interbotix_xs_msgs::JointSingleCommand shoulder_msg;
     interbotix_xs_msgs::JointSingleCommand elbow_msg;
-    //interbotix_xs_msgs::JointSingleCommand forearm_roll_msg;
     interbotix_xs_msgs::JointSingleCommand wrist_ang_msg;
     interbotix_xs_msgs::JointSingleCommand wrist_rot_msg;
 
 
     a.name = "arm";
-    a.cmd.push_back(u(0));
-    a.cmd.push_back(u(1));
-    a.cmd.push_back(u(2));
-    a.cmd.push_back(u(3));
-    a.cmd.push_back(u(4));
 
     waist_msg.name = "waist";
     waist_msg.cmd = u(0);
@@ -282,9 +234,6 @@
 
     elbow_msg.name = "elbow";
     elbow_msg.cmd = u(2);
-
-    //forearm_roll_msg.name = "forearm_roll";
-    //forearm_roll_msg.cmd = u(3);
 
     wrist_ang_msg.name = "wrist_angle";
     wrist_ang_msg.cmd = u(3);

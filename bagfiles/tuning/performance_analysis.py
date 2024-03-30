@@ -1,15 +1,28 @@
 import rosbag
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import numpy as np
 from matplotlib import rcParams
+from matplotlib import rc
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+#rc('font',**{'family':'serif','serif':['Times']})
+#rc('text', usetex=True)
 import tikzplotlib
 #matplotlib2tikz.save("mytikz.tex")
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes,  mark_inset
 
 # Set font and size to match LaTeX document
 rcParams['font.family'] = 'serif'
-#rcParams['font.serif'] = ['Computer Modern']
-rcParams['font.size'] = 10
+rcParams['font.serif'] = ['cmr10']
+rcParams['font.size'] = 14
+#rcParams['axes.unicode_minus'] = False
+rcParams['axes.formatter.use_mathtext'] = True
+#rcParams['font.text', usetex=True]
+
+#rc('font', **{'family': 'serif', 'serif': ['Computer Modern Roman']})
+
+#print(sorted(fm.get_font_names()))
+#rc('text', usetex=True)
 
 def ITAE(data, time, ref):
     error = abs(data - ref)
@@ -52,13 +65,13 @@ def tikzplotlib_fix_ncols(obj):
             
 
 # Step Response
-bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_3_Ka_4.bag"
+#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_3_Ka_4.bag"
 #bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_6_Ka_2.bag"
 #bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_6_Ka_3.bag"
 #bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_6_Ka_4.bag"
 #bag_path5 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_Kp_6_Ka_5.bag"
 ##############NOISE#######################
-#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_3_Ka_4_NOISE_var_1.bag"
+bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_3_Ka_4_NOISE_var_1.bag"
 bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_3_Ka_4_NOISE_var_2.bag"
 bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_3_Ka_4_NOISE_var_3.bag"
 bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/ReAIC_WRIST_Kp_2_Ka_4_NOISE_var_3_varmu_1_2024-02-29-14-26-53.bag"
@@ -738,7 +751,7 @@ ax1.step(time[0], data[0], '-', label='$\mathcal{K}_{p} = 3$; $\kappa_{a} = 4$')
 ax1.step(REF_timestamps, REF_datavalues, color ='k', linestyle='--', label='$\mu_{g}$', zorder=0)
 #ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
 ax1.set_ylabel('Joint Angle (rad)')
-ax1.legend(ncol=2, fontsize='small', frameon=False, loc='upper center', bbox_to_anchor =(0.5, 1.2))
+ax1.legend(ncol=2, fontsize='small', frameon=False, loc='upper center', bbox_to_anchor =(0.5, 1.3))
 ax1.grid(True)  # Turn on the grid for the first subplot
 ax1.set_xlim(0, 30)
 
@@ -799,18 +812,71 @@ ax4.step(timestamps_mu_d, data_values_mu_d, color='k', linestyle='--', label='$\
 ax4.grid(True)
 ax4.set_xlabel('Time (s)')
 ax4.set_ylabel('Joint Angle (rad)')
-ax4.legend()
+ax4.legend(ncol=1, fontsize='small', frameon=False, loc='upper center', bbox_to_anchor =(0.5, 1.12))
 #ax4.set_title('Wrist Rotation Step Response Goals')
 ax4.set_xlim(0, 30)
+ax4.set_ylim(None, 1.8)
 
 # Add step numbers slightly shifted up and bolded
 for i, (step, ref) in enumerate(zip(steps, step_references), start=1):
     step_center = (step[0] + step[1]) / 2
-    ax4.text(step_center, ref + 0.05, f'{i}', color='black',
-             horizontalalignment='center', verticalalignment='center', fontweight='bold')
+    if i != 7:
+        ax4.text(step_center, ref + 0.05, f'{i}', color='black',
+                horizontalalignment='center', verticalalignment='center', fontweight='bold')
+    else:
+        ax4.text(step_center-0.15, ref + 0.05, f'{i}', color='black',
+                horizontalalignment='center', verticalalignment='center', fontweight='bold')
+    
 
 #fig4.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/wrist_rotation_goal_step_responses_new.pdf')
 
+fig12, (ax1) = plt.subplots(1, 1, sharex=True)
+
+# Add a title to the entire figure
+#plt.suptitle('Wrist Rotation Step Responses with Noise')
+
+# Plot joint position on the first subplot
+ax1.step(time[0], data[0], '-', label='$\mathcal{K}_{p} = 3$; $\sigma_{q} = \sigma_{\dot{q}} = 1$', zorder = 4)
+#ax1.step(time[1], data[1], '-', label='$\mathcal{K}_{p} = 3$; $\sigma_{q} = \sigma_{\dot{q}} = 2$', zorder = 1)
+ax1.step(time[2], data[2], '-', label='$\mathcal{K}_{p} = 3$; $\sigma_{q} = \sigma_{\dot{q}} = 3$', zorder = 2)
+ax1.step(time[3], data[3], '-', label='$\mathcal{K}_{p} = 2$; $\sigma_{q} = \sigma_{\dot{q}} = 3$', zorder = 3)
+#ax1.step(time[4], data[4], '-', label='Ka = 5 Joint Position (rad)')
+ax1.step(REF_timestamps, REF_datavalues, color='k', linestyle='--', label='$\mu_{g}$', zorder = 0)
+
+#ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
+ax1.set_ylabel('Joint Angle (rad)')
+ax1.legend(ncol=2, fontsize='small', frameon=False, loc='upper center', bbox_to_anchor =(0.5, 1.18))#fontsize='x-small'
+ax1.grid(True)  # Turn on the grid for the first subplot
+ax1.set_xlim(0, 30)
+
+# Plot control signal on the second subplot
+#ax2.step(control_time[0], control_signal[0], '-', zorder = 4) #, label='Ka = 1 Control Signal (v)')
+#ax2.step(control_time[1], control_signal[1], '-', zorder = 1)#, #label='Ka = 2 Control Signal (v)')
+#ax2.step(control_time[2], control_signal[2], '-', zorder = 2)#, #label='Ka = 3 Control Signal (v)')
+#ax2.step(control_time[3], control_signal[3], '-', zorder = 3)#, #label='Ka = 4 Control Signal (v)')
+#ax2.step(control_time[4], control_signal[4], '-', label='Ka = 5 Control Signal (v)')
+ax1.set_xlabel('Time (s)')
+#fig12.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/Step_responses_with_noise_new2.pdf')
+#ax2.set_ylabel('Control Signal (V)')
+#ax2.legend(fontsize='x-small')
+#ax2.grid(True)  # Turn on the grid for the first subplot
+#ax2.set_xlim(0, 30)
+
+# Create inset axes for the zoomed-in view
+#axins = inset_axes(ax1, width="45%", height="45%", loc='upper right')
+#axins.step(time[0], data[0], '-')
+#axins.step(time[1], data[1], '-')
+#axins.step(time[2], data[2], '-')
+#axins.step(time[3], data[3], '-')
+#axins.step(REF_timestamps, REF_datavalues, 'k', linestyle='--', zorder = 0)
+#axins.set_xlim(13, 18)
+#axins.set_ylim(-0.35, 0.35)
+#plt.xticks(visible=False)
+#plt.yticks(visible=False)
+
+#ax1.indicate_inset_zoom(axins, edgecolor="black")
+# Mark the inset area and draw connecting lines
+#mark_inset(ax1, axins, loc1=2, loc2=4, fc="none", ec="0.7")
 
 # Show the plot
 plt.show()

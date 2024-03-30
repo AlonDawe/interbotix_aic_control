@@ -1,5 +1,17 @@
 /*
- * File:   PID.h
+ * File: AFC.h
+
+ * Author: Alon Dawe
+ * 
+ * Created: 13th October, 2023
+ * 
+ * Description: Class to perform Adaptive Friction Control of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
+ * 
+ * Original Author: Corrado Pezzato, TU Delft, DCSC 
+ * (https://github.com/cpezzato/panda_simulation/blob/master/panda_control/include/AIC.h)
+ * The original author implemented an AIC controller to control a 7-DOF Franka Emika Panda robot arm.
+ * The code in this file originated from this source, and was adapted to suit the control of a 5-DOF 
+ * Interbotix PincherX 150 robotic manipulator with a different control algorithm. 
  */
 
 #ifndef AFC_H

@@ -1,11 +1,17 @@
 /*
- * File:   uAIC.h
- * Author: Corrado Pezzato, TU Delft, DCSC
- *
- * Created on Sept. 28th, 2021
- *
- * Class to perform active inference control
- *
+ * File: uAIC.h
+
+ * Author: Alon Dawe
+ * 
+ * Created: 13th October, 2023
+ * 
+ * Description: Class header to perform Unbiased Active Inference Control of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
+ * 
+ * Original Author: Corrado Pezzato, TU Delft, DCSC 
+ * (https://github.com/cpezzato/unbiased_aic/blob/master/include/uAIC.h)
+ * The original author implemented an ubiased AIC controller to control a 7-DOF Franka Emika Panda robot arm.
+ * The code in this file originated from this source, and was adapted to suit the control of a 5-DOF 
+ * Interbotix PincherX 150 robotic manipulator
  */
 
 #ifndef uAIC_H

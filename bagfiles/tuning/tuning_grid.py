@@ -5,11 +5,15 @@ from matplotlib.patches import Circle
 from matplotlib import rcParams
 from matplotlib import cm
 
-
-# Set font and size to match LaTeX document
 rcParams['font.family'] = 'serif'
+rcParams['font.serif'] = ['cmr10']
+rcParams['font.size'] = 14
+#rcParams['axes.unicode_minus'] = False
+rcParams['axes.formatter.use_mathtext'] = True
+# Set font and size to match LaTeX document
+#rcParams['font.family'] = 'serif'
 #rcParams['font.serif'] = ['Computer Modern']
-rcParams['font.size'] = 10
+#rcParams['font.size'] = 10
 
 Kp1 = np.load('/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/parameter_grid_Kp_1.npy') # Kp1 = [ka, step, performance_metric]
 Kp2 = np.load('/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/tuning/parameter_grid_Kp_2.npy')
@@ -149,7 +153,8 @@ for i, ax in enumerate(axes):
 #fig2.suptitle('Variance Performance Metric Analysis', fontsize=16)
 #fig2.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/std_performance_metrics.pdf')
 
-performance_metric = ["ITAE", "Settling Time (s)", "Overshoot (%)"]
+#performance_metric = ["ITAE", "Settling Time (s)", "Overshoot (%)"]
+performance_metric = ["ITAE", "$t_{s}$ (s)", "$M_{p}$ (%)"]
 performance_metric_name = ["ITAE_Score", "Settling_Time", "Overshoot"]
 plt.rcParams['grid.color'] = "whitesmoke"
 for i in range(3):
@@ -187,7 +192,7 @@ for i in range(3):
     ax.set_zlabel(performance_metric[i], rotation=90)
     #ax.set_title(performance_metric[i])
     ax.view_init(elev=30, azim=15)  # Adjust the azimuth angle
-    fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/mean_performance_metrics_'+performance_metric_name[i]+'_new'+'.pdf')
+    #fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/mean_performance_metrics_'+performance_metric_name[i]+'_new'+'.pdf')
     
 for i in range(3):
 
@@ -213,7 +218,7 @@ for i in range(3):
     ax.set_zlabel(performance_metric[i], rotation=90)
     #ax.set_title(performance_metric[i])
     ax.view_init(elev=30, azim=15)  # Adjust the azimuth angle
-    fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/std_performance_metrics_'+performance_metric_name[i]+'_new'+'.pdf')
+    #fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/std_performance_metrics_'+performance_metric_name[i]+'_new'+'.pdf')
 
 # Show the plot
 plt.show()

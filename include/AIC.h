@@ -1,16 +1,17 @@
 /*
- * File:   AIC.h
- * Author: Corrado Pezzato, TU Delft, DCSC
- *
- * Created on April 14th, 2020
- *
- * Class to perform active inference control of the 7DOF Franka Emika Panda robot.
- *
- * This class takes care of everything, it subscribes to the topics containing
- * the sensory input and it perfoms free-energy minimization using gradient descent
- * updating the beliefs about the rosbot's states (i.e. joint values) and computing
- * the control actions. The control is in joint space.
- *
+ * File: AIC.h
+
+ * Author: Alon Dawe
+ * 
+ * Created: 13th October, 2023
+ * 
+ * Description: Class to perform Re-Active Inference Control of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
+ * 
+ * Original Author: Corrado Pezzato, TU Delft, DCSC 
+ * (https://github.com/cpezzato/panda_simulation/blob/master/panda_control/include/AIC.h)
+ * The original author implemented an AIC controller to control a 7-DOF Franka Emika Panda robot arm.
+ * The code in this file originated from this source, and was adapted to suit the control of a 5-DOF 
+ * Interbotix PincherX 150 robotic manipulator with a different control algorithm. 
  */
 
 #ifndef AIC_H

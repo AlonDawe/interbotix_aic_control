@@ -1,12 +1,17 @@
 /*
- * File:   AIC.cpp
- * Author: Corrado Pezzato, TU Delft, DCSC
- *
- * Created on Sept. 28th, 2021
- *
- * Class to perform active inference contro
- * Definition of the methods contained in AIC.h
- *
+ * File: uAIC.cpp
+
+ * Author: Alon Dawe
+ * 
+ * Created: 13th October, 2023
+ * 
+ * Description: Class to perform Unbiased Active Inference Control of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
+ * 
+ * Original Author: Corrado Pezzato, TU Delft, DCSC 
+ * (https://github.com/cpezzato/unbiased_aic/blob/master/src/classes/uAIC.cpp)
+ * The original author implemented an ubiased AIC controller to control a 7-DOF Franka Emika Panda robot arm.
+ * The code in this file originated from this source, and was adapted to suit the control of a 5-DOF 
+ * Interbotix PincherX 150 robotic manipulator
  */
 
 #include "uAIC.h"
@@ -26,13 +31,13 @@
       tauPub5 = nh.advertise<std_msgs::Float64>("/px150/wrist_rotate_controller/command", 20);
       //tauPub6 = nh.advertise<std_msgs::Float64>("/px150/Left_finger_controller/command", 20);
       //tauPub7 = nh.advertise<std_msgs::Float64>("/px150/right_finger_controller/command", 20);
+
+      //Subscriber
       sensorSub = nh.subscribe("/px150/joint_states", 1, &uAIC::jointStatesCallback, this);
-      //torque_pub = nh.advertise<std_msgs::Float64MultiArray>("/panda_joint_effort_controller/command", 20);
+
       // Publisher beliefs
       beliefs_mu_pub = nh.advertise<std_msgs::Float64MultiArray>("/beliefs_mu", 20);
       beliefs_mu_p_pub = nh.advertise<std_msgs::Float64MultiArray>("/beliefs_mu_p", 20);
-      // Listener joint states
-     // sensorSub = nh.subscribe("/franka_state_controller/joint_states", 1, &uAIC::jointStatesCallback, this);
 
       // Listener to goals
       goal_mu_dSub = nh.subscribe("/desired_state", 5, &uAIC::setDesiredState, this);
@@ -98,6 +103,7 @@
 
     // Begin Tuning parameters of u-AIC
     //---------------------------------------------------------------
+
     // Variances associated with the beliefs and the sensory inputs
     ROS_INFO("Setting u-AIC parameters from parameter space");
     nh.getParam("var_mu", var_mu);
@@ -134,29 +140,12 @@
         K_i(i,i) = k_i;
     }
 
-    //SigmaP_mu(5,5) = 2*1/var_mu;
-    //SigmaP_muprime(5,5) = 4*1/var_muprime;
-
-    //SigmaP_yq0(4,4) = 0.1*1/var_q;
-    //SigmaP_yq1(4,4) = 0.1*1/var_qdot;
-
-    //SigmaP_yq0(5,5) = 0.5*1/var_q;
-    //SigmaP_yq1(5,5) = 0.5*1/var_qdot;
-
-    //SigmaP_yq0(6,6) = 0.01*1/var_q;
-    //SigmaP_yq1(6,6) = 0.01*1/var_qdot;
-
     // Single proportional
     K_p(0,0) = k_p0;
     K_p(1,1) = k_p1; 
     K_p(2,2) = k_p2;
     K_p(3,3) = k_p3;
     K_p(4,4) = k_p4;
-    //K_p(5,5) = k_p5;
-    //K_p(6,6) = k_p6;
-    //K_d(5,5) = 10; 
-    //K_i(5,5) = k_i;
-    //K_i(6,6) = k_i;
 
     // Initialize control actions
     u << 0.0, 0.0, 0.0, 0.0, 0.0;
@@ -173,7 +162,7 @@
   }
 
   void uAIC::minimiseF(){
-    /////////// Unbiased uAIC //////////
+  // Unbiased uAIC
     for (int i=0;i<1;i++){
       mu_dot = - k_mu*(-SigmaP_yq0*(jointPos-mu) + SigmaP_mu*(mu - (mu_past + h*mu_p_past)));
       mu_dot_p = - k_mu*(-SigmaP_yq1*(jointVel-mu_p) + SigmaP_muprime*(mu_p-mu_p_past));
@@ -201,7 +190,6 @@
 	//ROS_WARN("Current integral term: %f",I_gain(0));
         // Calculate and send control actions
     uAIC::computeActions();
-        /////////////////////////////////////////
     
     for (int i=0;i<5;i++){
     	beliefs_mu_data.data[i] = mu(i);

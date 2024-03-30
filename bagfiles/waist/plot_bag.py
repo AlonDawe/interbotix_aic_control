@@ -3,9 +3,14 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
 # Set font and size to match LaTeX document
-rcParams['font.family'] = 'serif'
+#rcParams['font.family'] = 'serif'
 #rcParams['font.serif'] = ['Computer Modern']
-rcParams['font.size'] = 10
+#rcParams['font.size'] = 10
+rcParams['font.family'] = 'serif'
+rcParams['font.serif'] = ['cmr10']
+rcParams['font.size'] = 14
+#rcParams['axes.unicode_minus'] = False
+rcParams['axes.formatter.use_mathtext'] = True
 
 # Specify the path to your ROS bag file
 #bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/_2023-11-21-14-13-48.bag"
@@ -141,7 +146,7 @@ print("Kd: ", Kd)
 fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 
 # Add a title to the entire figure
-plt.suptitle('Open-Loop Impulse Response')
+#plt.suptitle('Open-Loop Impulse Response')
 
 # Plot joint position on the first subplot
 ax1.step(timestamps, data_values, label='Waist Joint')
@@ -152,8 +157,9 @@ ax1.vlines(threshold_timestamp, ymin=0, ymax=final_threshold_value, color='r', l
 # Plot a horizontal line from the beginning to the threshold timestamp at the height of the threshold value
 #ax1.hlines(final_threshold_value, xmin=timestamps[0], xmax=threshold_timestamp, color='r', linestyle='--', label=r' $\tau = 0.63 X_{p}$')
 ax1.set_xlim(0, 1.0)  # Set x-axis limits for the first subplot
-ax1.set_ylabel(r'Joint Velocity ($\frac{rad}{s}$)')
-ax1.legend()
+ax1.set_ylabel('Joint Velocity (rad/s)')
+#ax1.legend()
+ax1.legend(ncol=3, fontsize='small', frameon=False, loc='upper center', bbox_to_anchor =(0.5, 1.28))
 ax1.grid(True)  # Turn on the grid for the first subplot
 
 ax1.annotate('', xy=(threshold_timestamp, -0.05), xytext=(first_positive_timestamp, -0.05), arrowprops=dict(arrowstyle='<->'))
@@ -161,7 +167,7 @@ ax1.text((first_positive_timestamp + threshold_timestamp) / 2, -0.08, r'$\tau$',
 
 # Add arrow from 0 to t_d and label it t_d
 #ax1.annotate('', xy=(first_positive_timestamp, -0.05), xytext=(0, -0.05), arrowprops=dict(arrowstyle='<->'))
-ax1.text(first_positive_timestamp / 2, -0.08, r'$t_{d}$', ha='center', va='top')
+ax1.text(first_positive_timestamp / 1.5, -0.08, r'$t_{d}$', ha='center', va='top')
 
 
 # Plot control signal on the second subplot
@@ -169,8 +175,8 @@ ax1.text(first_positive_timestamp / 2, -0.08, r'$t_{d}$', ha='center', va='top')
 ax2.step(timestamps_u, data_values_u)
 #ax2.plot([0.4, 1.0], [0.0, 0.0])[0.4, 1.0]
 ax2.set_xlim(0, 1.0)  # Set x-axis limits for the second subplot
-ax2.set_xlabel('Time ($s$)')
-ax2.set_ylabel('Control Signal ($V$)')
+ax2.set_xlabel('Time (s)')
+ax2.set_ylabel('Control Signal (V)')
 #ax2.legend()
 ax2.grid(True)  # Turn on the grid for the first subplot
 

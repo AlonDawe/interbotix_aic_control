@@ -1,4 +1,12 @@
 /*
+ * File: OL_step_response.cpp
+ *
+ * Author: Alon Dawe
+ * 
+ * Created: 13th October, 2023
+ * 
+ * Description: Class to perform an open-loop  step response of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
+ * 
  */
 
 #include "PID.h"

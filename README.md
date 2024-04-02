@@ -34,7 +34,7 @@ interbotix_aic_control/
 │       ├── PID.cpp
 │       ├── ReAIC.cpp
 │       └── uAIC.cpp
-|
+│
 ├── include/
 │   ├── AFC.h
 │   ├── AIC.h
@@ -56,7 +56,7 @@ interbotix_aic_control/
 │   ├── ReAIC_control.launch
 │   ├── uAIC_control.launch
 │   └── Step_control.launch
-|
+│
 ├── bagfiles/
 │   ├── tuning/
 │   ├── waist/
@@ -67,13 +67,63 @@ interbotix_aic_control/
 └── LICENSE
 ```
 
-## Usage
+## Setup
+All experiments were executed using [Ubuntu 20.04](https://releases.ubuntu.com/focal/) OS and [ROS Noetic](https://wiki.ros.org/noetic).
 
-1. Clone the repository:
+Create a ROS workspace by navigating to the desired directory where you will store all your code, then execute the following:
+
+```bash
+source /opt/ros/noetic/setup.bash
+```
+
+```bash
+mkdir ./interbotix_pincherX_ws/src
+cd ./interbotix_pincherX_ws/
+$ catkin_make
+```
+
+```bash
+source devel/setup.bash
+```
+
+### Setting-up [Interbotix X-Series Arm Packages](https://github.com/Interbotix/interbotix_ros_manipulators/tree/main/interbotix_ros_xsarms):
+Please consult the Trossen Robotics [installation guide](https://docs.trossenrobotics.com/interbotix_xsarms_docs/ros_interface.html) for your specific setup. Make sure to save all packages within the `src/` directory of your workspace.
+
+Additionally you will need the following package that contains support level ROS wrappers and robot interface modules:
+
+```bash
+git clone https://github.com/Interbotix/interbotix_ros_toolboxes.git
+```
+
+### Clone this repository:
+In the `src/` directory of yout workspace clone this repository:
+
+```bash
+git clone https://github.com/AlonDawe/interbotix_aic_control.git
+```
+
+### Modify default config modes:
+
+Navigate to `interbotix_xsarm_control/config/modes.yaml` and change `operating_mode: pwm`.
+Navigate to `interbotix_xsarm_control/config/px150.yaml` and change `update_rate: 1000` in order to allow the joint states publishe to update at a rate of 1 kHz.
+
+### Compile your workspace
+
+Navigate to your workspace directory and run the following:
+
+```bash
+$ catkin_make
+```
+
+
+
+
+
 
 ## References
 
 [1]: C. Pezzato, R. Ferrari, and C. H. Corbato, “A Novel Adaptive Controller for Robot Manipulators Based on Active Inference,” IEEE Robotics and Automation Letters, vol. 5, pp. 2973–2980, Apr. 2020.
+
 [2]: K. Verbert, R. Toth, and R. Babuska, “Adaptive Friction Compensation: A Globally Stable Approach,” IEEE/ASME Transactions on Mechatronics, pp. 1–1, 2015.
 
 

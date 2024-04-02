@@ -1,6 +1,6 @@
-# interbotix_aic_control
+# Active Inference Control for an Interbotix PincherX 150 Robotic Manipulator 
 
-This repository contains code developed for my MSc thesis project focused on enhancing the Active Inference Controller (AIC) for robotic manipulation tasks. Specifically, a modified version of the AIC, called the Reactive Active Inference Controller (ReAIC), was implemented and evaluated on an Interbotix PincherX 150 5-DOF manipulator using ROS (Robot Operating System). Additionally, several other controllers, including a PID controller and an Adaptive Friction Compensator (AFC) were implemented for comparison.
+This repository contains code developed for my MSc thesis project focused on enhancing the Active Inference Controller (AIC) developed in [1] for robotic manipulation tasks. Specifically, a modified version of the AIC, called the Reactive Active Inference Controller (ReAIC), was implemented and evaluated on an [Interbotix PincherX 150](https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/px150.html) 5-DOF manipulator using ROS (Robot Operating System). Additionally, several other controllers, including the original AIC [1], the classic PID controller and an Adaptive Friction Compensator (AFC) [2] were implemented for comparison.
 
 ## Abstract
 
@@ -18,32 +18,62 @@ The application of the Free Energy Principle (FEP) and Active Inference (AIF) in
 
 TEMPLATE ONLY
 
+``` bash
 interbotix_aic_control/
 │
 ├── src/
-│   ├── pid_controller.py
-│   ├── aic_controller.py
-│   ├── reaic_controller.py
-│   ├── afc_controller.py
-│   ├── uaic_controller.py
-│   └── ...
+│   ├── AFC_controller.cpp
+│   ├── AIC_controller.cpp
+│   ├── PID_controller.cpp
+│   ├── ReAIC_controller.cpp
+│   ├── uAIC_controller.cpp
+│   ├── OL_step_response.cpp
+│   └── classes/
+│       ├── AFC.cpp
+│       ├── AIC.cpp
+│       ├── PID.cpp
+│       ├── ReAIC.cpp
+│       └── uAIC.cpp
+|
+├── include/
+│   ├── AFC.h
+│   ├── AIC.h
+│   ├── PID.h
+│   ├── ReAIC.h
+│   ├── uAIC.h
 │
-├── scripts/
-│   ├── run_experiment_1.sh
-│   ├── run_experiment_2.sh
-│   ├── ...
-│   └── ...
-│
-├── data/
-│   ├── experiment_1_results.csv
-│   ├── experiment_2_results.csv
-│   └── ...
+├── config/
+│   ├── AFC_tuning.yaml
+│   ├── AIC_tuning.yaml
+│   ├── PID_tuning.yaml
+│   ├── ReAIC_tuning.yaml
+│   └── uAIC_tuning.yaml
+│    
+├── launch/
+│   ├── AFC_control.launch
+│   ├── AIC_control.launch
+│   ├── PID_control.launch
+│   ├── ReAIC_control.launch
+│   ├── uAIC_control.launch
+│   └── Step_control.launch
+|
+├── bagfiles/
+│   ├── tuning/
+│   ├── waist/
+│   ├── wrist_ang/
+│   └── wrist_rot/
 │
 ├── README.md
 └── LICENSE
+```
 
 ## Usage
 
 1. Clone the repository:
+
+## References
+
+[1]: C. Pezzato, R. Ferrari, and C. H. Corbato, “A Novel Adaptive Controller for Robot Manipulators Based on Active Inference,” IEEE Robotics and Automation Letters, vol. 5, pp. 2973–2980, Apr. 2020.
+[2]: K. Verbert, R. Toth, and R. Babuska, “Adaptive Friction Compensation: A Globally Stable Approach,” IEEE/ASME Transactions on Mechatronics, pp. 1–1, 2015.
 
 

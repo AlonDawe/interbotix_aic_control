@@ -693,7 +693,7 @@ subt2 = np.ones(len(REF_timestamps))
 #print(len(subt))
 
 # Plot joint position on the first subplot
-ax1.step(t_step, y_step, '-', label='G(s)')
+ax1.step(t_step, y_step, '-', label='$T_{cl}(s)$')
 ax1.step(time[2]-3*subt, data[2], '-', label='Waist Joint')
 ax1.step(REF_timestamps-3*subt2, REF_datavalues, color='k', linestyle='--', label='$\mu_{g}$', zorder=0)
 #ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
@@ -703,7 +703,7 @@ ax1.legend(ncol=3, fontsize='small', frameon=False, loc='upper center', bbox_to_
 ax1.grid(True)  # Turn on the grid for the first subplot
 ax1.set_xlim(0, 3)
 ax1.set_ylim(0, 1)
-#fig8.savefig('/home/alon/Documents/thesis/Latex Experiment Graphs/Gs_vs_real.pdf')
+fig8.savefig('/home/alon/Documents/thesis/Latex Experiment Graphs/Gs_vs_real.pdf')
 
 
 # Show the plot

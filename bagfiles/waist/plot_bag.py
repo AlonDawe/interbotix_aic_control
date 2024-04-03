@@ -15,7 +15,8 @@ rcParams['axes.formatter.use_mathtext'] = True
 # Specify the path to your ROS bag file
 #bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/_2023-11-21-14-13-48.bag"
 bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/WAIST_STEP_2023-12-04-11-24-48.bag"
-#bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/WAIST_STEP_2024-03-13-10-06-24.bag"
+bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/WAIST_STEP_TRIAL_2024-04-02-19-36-34.bag"
+bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/WAIST_STEP_TRIAL_2024-04-02-19-53-46.bag"
 # Open the bag file
 bag = rosbag.Bag(bag_path)
 
@@ -37,8 +38,9 @@ for topic, msg, t in bag.read_messages():
         # Extract data from the message (replace with your actual message structure)
         if stepped == True:
             
-            timestamp = msg.header.stamp.to_sec() - step_time
+            timestamp = t.to_sec() - step_time
             data_value = msg.velocity[0]
+            #data_value = msg.position[0]
             
             # Append data to lists
             timestamps.append(timestamp)
@@ -47,7 +49,10 @@ for topic, msg, t in bag.read_messages():
             
         else:
             timestamps.append(step_time)
+            
             data_value = msg.velocity[0]
+            #data_value = msg.position[0]
+            
             data_values.append(data_value)
     #if topic == '/px150/waist_controller/command':
     if topic == '/px150/commands/joint_single':
@@ -94,8 +99,8 @@ final_threshold_value = 0.0
 # Iterate through the data_values to find the first value greater than or equal to the threshold
 for i in range(len(data_values)):
     if data_values[i] >= threshold_value:
-        threshold_timestamp = timestamps[i-1]
-        final_threshold_value = data_values[i-1]
+        threshold_timestamp = timestamps[i]
+        final_threshold_value = data_values[i]
         break
 print("threshold timestamp = ", threshold_timestamp)
 print("final threshold value = ", final_threshold_value)
@@ -180,7 +185,7 @@ ax2.set_ylabel('Control Signal (V)')
 #ax2.legend()
 ax2.grid(True)  # Turn on the grid for the first subplot
 
-fig.savefig('/home/alon/Documents/thesis/Tuning/OL_impulse_response.pdf')
+#fig.savefig('/home/alon/Documents/thesis/Tuning/OL_impulse_response.pdf')
 
 
 # Show the plot

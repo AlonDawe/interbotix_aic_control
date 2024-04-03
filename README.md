@@ -1,8 +1,12 @@
 # Active Inference Control for an Interbotix PincherX 150 Robotic Manipulator 🦾
 
-This repository contains code developed for my MSc thesis project focused on enhancing the Active Inference Controller (AIC) developed in [1] for robotic manipulation tasks. Specifically, a modified version of the AIC, called the Reactive Active Inference Controller (ReAIC), was implemented and evaluated on an [Interbotix PincherX 150](https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/px150.html) 5-DOF manipulator using ROS (Robot Operating System). Additionally, several other controllers, including the original AIC [1], the classic PID controller and an Adaptive Friction Compensator (AFC) [2] were implemented for comparison.
+This repository contains code focused on enhancing the Active Inference Controller (AIC) developed in [1] for robotic manipulation tasks. Specifically, a modified version of the AIC, called the Reactive Active Inference Controller (ReAIC), was implemented and evaluated on an [Interbotix PincherX 150](https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/px150.html) 5-DOF manipulator using ROS (Robot Operating System). Additionally, several other controllers, including the original AIC [1], the classic PID controller and an Adaptive Friction Compensator (AFC) [2] were implemented for comparison.
 
-![Interbotix PincherX 150, 5-DOF Manipulator](./images/Interbotix_PincherX_150_labelled.jpg)
+The code within this repository was adapted from the [THIS GitHub repository](https://github.com/cpezzato/panda_simulation/tree/master), in which the author implemented an AIC controller to control a 7-DOF Franka Emika Panda robot arm for their study [1]. The code was changed to suit the control of a real 5-DOF Interbotix PincherX 150 robotic manipulator with different control algorithms. 
+
+<div align="center">
+  <img src="./images/Interbotix_Pincher.png" alt="Interbotix PincherX 150, 5-DOF Manipulator">
+</div>
 
 ## Structure
 
@@ -47,9 +51,13 @@ interbotix_aic_control/
 │
 ├── bagfiles/
 │   ├── tuning/
+│   │   ├── ...
 │   ├── waist/
+│   │   ├── ...
 │   ├── wrist_ang/
+│   │   ├── ...
 │   └── wrist_rot/
+│       ├── ...
 │
 ├── README.md
 └── LICENSE
@@ -116,7 +124,11 @@ You should now be able to see the libe robot rendered in rviz.
 then run the following:
 
 > [!CAUTION]
-> The following launch file will make the one specific joint move in step maneuvers. Please ensure that the robot has been placed in a position such that it will will not hit anything, and that you have made sure which joint will be controlled. This should be checked in both `interbotix_aic_control/src/*selected controller*_controller.cpp` and `interbotix_aic_control/src/*selected controller*.cpp`
+> The following launch file will make one specific joint move in the goal step maneuvers shown below. Please ensure that the robot has been placed in a position such that it will will not hit anything, and that you have made sure which joint will be controlled. This should be checked in both `interbotix_aic_control/src/*selected controller*_controller.cpp` and `interbotix_aic_control/src/*selected controller*.cpp`
+
+<div align="center">
+  <img src="./images/goal_steps.png" alt="Interbotix PincherX 150, 5-DOF Manipulator">
+</div>
 
 ```bash
 roslaunch interbotix_aic_control ReAIC_control.launch

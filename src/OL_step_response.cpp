@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 
   // Main loop
   PID_controller.setStep(controlInput2);
-  while (ros::ok() && cycles <= 400){
+  while (ros::ok() && cycles <= 1000){
     // Manage all the callbacks and so read sensors
     ros::spinOnce();
 

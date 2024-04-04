@@ -14,8 +14,7 @@ The code within this repository was adapted from the [THIS GitHub repository](ht
 
 ## Performance Comparison - ReAIC vs. AIC
 <div align="center">
-  <img src="./images/ReAIC_2.gif" style="display:inline-block; width:45%;"> 
-  <img src="./images/AIC_2.gif" style="display:inline-block; width:45%;">
+  <img src="./images/ReAIC_2.gif" style="display:inline-block; width:45%;"> <img src="./images/AIC_2.gif" style="display:inline-block; width:45%;">
 </div>
 
 ## ReAIC
@@ -28,26 +27,25 @@ The ReAIC requires seven tuning parameters per joint, which may seem like a lot;
 
 - $\kappa_{\mu}$, $\kappa_{a}$: The gradient descent learning rates for the reference state update and control actions, respectively. These are responsible for how fast the VFE is minimised through perception and action. Larger learning rates allow for a faster minimisation, although this can also cause gradient descent overshoot.
 
-- 𝓚<sub>p</sub>: The proportional parameter that distinguishes the ReAIC from the AIC defined in [1]. It influences the reference model speed at which the joints should be steered toward the goal position $\mu_{g}$.
+- $𝓚_{p}$: The proportional parameter that distinguishes the ReAIC from the AIC defined in [1]. It influences the reference model speed at which the joints should be steered toward the goal position $\mu_{g}$.
 
 ### Tuning Procedure:
 
-1) The variances $\sigma_{q}, \sigma_{\dot{q}}, \sigma_{\mu}, \sigma_{\mu'}$ and the proportional parameter 𝓚<sub>p</sub> are set to one, indicating high confidence in both the sensory input and reference state and setting a slow settling time.
+1) The variances $\sigma_{q}, \sigma_{\dot{q}}, \sigma_{\mu}, \sigma_{\mu'}$ and the proportional parameter $𝓚_{p}$ are set to one, indicating high confidence in both the sensory input and reference state and setting a slow settling time.
 
 2) The control actions are disabled by setting the learning rate $\kappa_{a}$ to zero.
 
-3) The learning rate for the reference state update $\kappa_{\mu}$ is incremented such that the state estimate converges to a stable value in a static case within 20 - \qty[mode = text]{30}{\milli s}. This is done by plotting the reference joint position $\mu$ during a step response while the control action has been disabled.
+3) The learning rate for the reference state update $\kappa_{\mu}$ is incremented such that the state estimate converges to a stable value in a static case within 20 - 30 ms. This is done by plotting the reference joint position $\mu$ during a step response while the control action has been disabled.
 
-4) A desired settling time $t_{s}$ can be set by increasing the proportional parameter 𝓚<sub>p</sub> with the following formula:
+4) A desired settling time $t_{s}$ can be set by increasing the proportional parameter $𝓚_{p}$ with the following formula:
     
-    $\mathcal{K}_{p} = \frac{5(\mu_{g}-y_{q})}{t_{s}}$  
-   
+    $𝓚_{p} = \frac{5(\mu_{g}-y_{q})}{t_{s}}$  
 
-    Increasing $\mathcal{K}_{p}$ to large values will result in overshoot behaviour in the real system (see Section~\ref{subsec:Tuning_influences}). It is suggested to start with a reasonable desired settling time.
+    Increasing $𝓚_{p}$ to large values will result in overshoot behaviour in the real system (see Section~\ref{subsec:Tuning_influences}). It is suggested to start with a reasonable desired settling time.
 
 5) Increment the control action's learning rate $\kappa_{a}$ to allow the joint to be steered to the goal. A large learning rate is preferable for the controller to cope with changes in the sensory input as quickly as possible. However, increasing it too much will result in oscillatory behaviour due to overshooting the gradient descent operation. 
 
-5) If the system response continues to exhibit oscillatory behaviour despite increasing $\mathcal{K}_{p}$ and decreasing $\kappa_{a}$, adjusting the variances of the noisiest sensors and the reference state of the higher-order generalized motions becomes necessary to reduce their sensory confidence. When a large $\mathcal{K}_{p}$ is chosen, lowering the confidence in the higher-order generalized motion, denoted as $\sigma_{\mu'}$, becomes crucial. This is because the control actions will attempt to control the real manipulator joint (second-order system) using the first-order reference model at large velocities and accelerations. Therefore, the confidence in the reference model acceleration should be decreased. 
+5) If the system response continues to exhibit oscillatory behaviour despite increasing $𝓚_{p}$ and decreasing $\kappa_{a}$, adjusting the variances of the noisiest sensors and the reference state of the higher-order generalized motions becomes necessary to reduce their sensory confidence. When a large $𝓚_{p}$ is chosen, lowering the confidence in the higher-order generalized motion, denoted as $\sigma_{\mu'}$, becomes crucial. This is because the control actions will attempt to control the real manipulator joint (second-order system) using the first-order reference model at large velocities and accelerations. Therefore, the confidence in the reference model acceleration should be decreased. 
 
 
 ## Structure

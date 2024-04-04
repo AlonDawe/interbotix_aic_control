@@ -14,7 +14,13 @@ The code within this repository was adapted from the [THIS GitHub repository](ht
 
 ## Performance Comparison - ReAIC vs. AIC
 <div align="center">
-  <img src="./images/ReAIC_2.gif" style="display:inline-block; width:45%;"> <img src="./images/AIC_2.gif" style="display:inline-block; width:45%;">
+  <img src="./images/ReAIC_2.gif" style="display:inline-block; width:80%;"> 
+
+  <em>ReAIC</em>
+
+  <img src="./images/AIC_2.gif" style="display:inline-block; width:80%;">
+
+  <em>AIC</em>
 </div>
 
 ## ReAIC
@@ -41,7 +47,7 @@ The ReAIC requires seven tuning parameters per joint, which may seem like a lot;
     
     $𝓚_{p} = \frac{5(\mu_{g}-y_{q})}{t_{s}}$  
 
-    Increasing $𝓚_{p}$ to large values will result in overshoot behaviour in the real system (see Section~\ref{subsec:Tuning_influences}). It is suggested to start with a reasonable desired settling time.
+    Increasing $𝓚_{p}$ to large values will result in overshoot behaviour in the real system. It is suggested to start with a reasonable desired settling time.
 
 5) Increment the control action's learning rate $\kappa_{a}$ to allow the joint to be steered to the goal. A large learning rate is preferable for the controller to cope with changes in the sensory input as quickly as possible. However, increasing it too much will result in oscillatory behaviour due to overshooting the gradient descent operation. 
 

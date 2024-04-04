@@ -1,4 +1,4 @@
-# Ractive Active Inference Control (ReAIC) of an Interbotix PincherX 150 Robotic Manipulator 🦾
+# Reactive Active Inference Control (ReAIC) of an Interbotix PincherX 150 Robotic Manipulator 🦾
 
 This repository contains code focused on enhancing the Active Inference Controller (AIC) developed in [^1] for robotic manipulation tasks. Specifically, a modified version of the AIC, called the Reactive Active Inference Controller (ReAIC), was implemented and evaluated on an [Interbotix PincherX 150](https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/px150.html) 5-DOF manipulator using ROS (Robot Operating System). Additionally, several other controllers, including the original AIC [^1], the classic PID controller and an Adaptive Friction Compensator (AFC) [^2] were implemented for comparison.
 
@@ -7,6 +7,47 @@ The code within this repository was adapted from the [THIS GitHub repository](ht
 <div align="center">
   <img src="./images/Interbotix_Pincher.png" alt="Interbotix PincherX 150, 5-DOF Manipulator">
 </div>
+
+## Performance Comparison - ReAIC vs. AIC
+
+<div style="display:flex;">
+  <img src="./images/ReAIC_2.gif" style="display:inline-block; width:50%;">
+  <img src="./images/AIC_2.gif" style="display:inline-block; width:50%;">
+</div>
+
+                  ReAIC                                 AIC
+
+## ReAIC
+
+### Tuning Parameters:
+
+The ReAIC requires seven tuning parameters per joint, which may seem like a lot; however, only three of the seven would require delicate tuning. The tuning parameters are:
+
+- $\sigma_{q}$, $\sigma_{\dot{q}}$, $\sigma_{\mu}$, $\sigma_{\mu'}$: Gaussian noise variances in the generative model of the sensory data $\sigma_{q}, \sigma_{\dot{q}}$ and the reference state dynamics $\sigma_{\mu}, \sigma_{\mu'}$. These variances represent the confidence in the controller's sensory position and velocity input and the confidence in the reference velocity and acceleration, respectively [1].
+
+- $\kappa_{\mu}$, $\kappa_{a}$: The gradient descent learning rates for the reference state update and control actions, respectively. These are responsible for how fast the VFE is minimised through perception and action. Larger learning rates allow for a faster minimisation, although this can also cause gradient descent overshoot.
+
+- $\mathcal{K}_{p}$: The proportional parameter that distinguishes the ReAIC from the AIC defined in [1]. It influences the reference model speed at which the joints should be steered toward the goal position $\mu_{g}$.
+
+### Tuning Procedure:
+
+1) The variances $\sigma_{q}, \sigma_{\dot{q}}, \sigma_{\mu}, \sigma_{\mu'}$ and the proportional parameter $\mathcal{K}_{p}$ are set to one, indicating high confidence in both the sensory input and reference state and setting a slow settling time.
+
+2) The control actions are disabled by setting the learning rate $\kappa_{a}$ to zero.
+
+3) The learning rate for the reference state update $\kappa_{\mu}$ is incremented such that the state estimate converges to a stable value in a static case within 20 - \qty[mode = text]{30}{\milli s}. This is done by plotting the reference joint position $\mu$ during a step response while the control action has been disabled.
+
+4) A desired settling time $t_{s}$ can be set by increasing the proportional parameter $\mathcal{K}_{p}$ with the following formula:
+
+
+    $\mathcal{K}_{p} = \frac{5 (\mu_{g} - y_{q})}{t_{s}}$  
+
+    Increasing $\mathcal{K}_{p}$ to large values will result in overshoot behaviour in the real system (see Section~\ref{subsec:Tuning_influences}). It is suggested to start with a reasonable desired settling time.
+
+5) Increment the control action's learning rate $\kappa_{a}$ to allow the joint to be steered to the goal. A large learning rate is preferable for the controller to cope with changes in the sensory input as quickly as possible. However, increasing it too much will result in oscillatory behaviour due to overshooting the gradient descent operation. 
+
+5) If the system response continues to exhibit oscillatory behaviour despite increasing $\mathcal{K}_{p}$ and decreasing $\kappa_{a}$, adjusting the variances of the noisiest sensors and the reference state of the higher-order generalized motions becomes necessary to reduce their sensory confidence. When a large $\mathcal{K}_{p}$ is chosen, lowering the confidence in the higher-order generalized motion, denoted as $\sigma_{\mu'}$, becomes crucial. This is because the control actions will attempt to control the real manipulator joint (second-order system) using the first-order reference model at large velocities and accelerations. Therefore, the confidence in the reference model acceleration should be decreased. 
+
 
 ## Structure
 
@@ -123,7 +164,7 @@ You should now be able to see the libe robot rendered in rviz.
 Then run the following:
 
 > [!CAUTION]
-> The following launch file will make one specific joint move in the goal step maneuvers shown below. Please ensure that the robot has been placed in a position such that it will will not hit anything, and that you have made sure which joint will be controlled. This should be checked in both `interbotix_aic_control/src/*selected controller*_controller.cpp` and `interbotix_aic_control/src/*selected controller*.cpp`
+> The following launch file will make one specific joint move in the goal step maneuvers shown below. Please ensure that the robot has been placed in a position such that it will will not hit anything, and that you have made sure which joint will be controlled. This should be checked in both `interbotix_aic_control/src/ReAIC_controller.cpp` and `interbotix_aic_control/src/ReAIC.cpp`
 
 <div align="center">
   <img src="./images/goal_steps.png" alt="Interbotix PincherX 150, 5-DOF Manipulator">

@@ -219,9 +219,9 @@
 
     a.cmd = {waist_msg.cmd, shoulder_msg.cmd, elbow_msg.cmd, wrist_ang_msg.cmd, wrist_rot_msg.cmd};
 
-    singlePub.publish(waist_msg);
+    //singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
-    //singlePub.publish(wrist_ang_msg);
+    singlePub.publish(wrist_ang_msg);
     //singlePub.publish(wrist_rot_msg);
 
 

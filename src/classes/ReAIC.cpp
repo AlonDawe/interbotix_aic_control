@@ -185,9 +185,9 @@
     F.data = SPEq + SPEdq + SPEmu_p + SPEmu_pp; 
 
     // Free-energy minimization using gradient descent and beliefs update
-    mu_dot = mu_p - k_mu_adapt*(-SigmaP_yq0*(jointPos-mu)+SigmaP_mu*(mu_p+k_p_adapt*mu-k_p_adapt*mu_d));
-    mu_dot_p = mu_pp - k_mu_adapt*(-SigmaP_yq1*(jointVel-mu_p)+SigmaP_mu*(mu_p+k_p_adapt*mu-k_p_adapt*mu_d)+SigmaP_muprime*(mu_pp+k_p_adapt*mu_p));
-    mu_dot_pp = - k_mu_adapt*(SigmaP_muprime*(mu_pp+k_p_adapt*mu_p));
+    mu_dot = mu_p - k_mu_adapt*(-SigmaP_yq0*(jointPos-mu)+SigmaP_mu*(mu_p+Kp*mu-Kp*mu_d));
+    mu_dot_p = mu_pp - k_mu_adapt*(-SigmaP_yq1*(jointVel-mu_p)+SigmaP_mu*(mu_p+Kp*mu-Kp*mu_d)+SigmaP_muprime*(mu_pp+Kp*mu_p));
+    mu_dot_pp = - k_mu_adapt*(SigmaP_muprime*(mu_pp+Kp*mu_p));
 
     // Beliefs update
     mu = mu + h*mu_dot;             // Belief about the position
@@ -271,9 +271,9 @@
     wrist_rot_msg.name = "wrist_rotate";
     wrist_rot_msg.cmd = u(4);
 
-    singlePub.publish(waist_msg);
+    //singlePub.publish(waist_msg);
     //singlePub.publish(elbow_msg);
-    //singlePub.publish(wrist_ang_msg);
+    singlePub.publish(wrist_ang_msg);
     //singlePub.publish(wrist_rot_msg);
 
     a.cmd = {waist_msg.cmd, shoulder_msg.cmd, elbow_msg.cmd, wrist_ang_msg.cmd, wrist_rot_msg.cmd};

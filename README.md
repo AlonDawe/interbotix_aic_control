@@ -14,11 +14,11 @@ The code within this repository was adapted from the [THIS GitHub repository](ht
 
 ## Performance Comparison - ReAIC vs. AIC
 <div align="center">
-  <img src="./images/ReAIC_2.gif" style="display:inline-block; width:80%;"> 
+  <img src="./images/ReAIC_2.gif" style="display:inline-block; width:100%;"> 
 
   <em>ReAIC</em>
 
-  <img src="./images/AIC_2.gif" style="display:inline-block; width:80%;">
+  <img src="./images/AIC_2.gif" style="display:inline-block; width:100%;">
 
   <em>AIC</em>
 </div>
@@ -29,11 +29,11 @@ The code within this repository was adapted from the [THIS GitHub repository](ht
 
 The ReAIC requires seven tuning parameters per joint, which may seem like a lot; however, only three of the seven would require delicate tuning. The tuning parameters are:
 
-- $\sigma_{q}$, $\sigma_{\dot{q}}$, $\sigma_{\mu}$, $\sigma_{\mu'}$: Gaussian noise variances in the generative model of the sensory data $\sigma_{q}, \sigma_{\dot{q}}$ and the reference state dynamics $\sigma_{\mu}, \sigma_{\mu'}$. These variances represent the confidence in the controller's sensory position and velocity input and the confidence in the reference velocity and acceleration, respectively [1].
+- $\sigma_{q}$, $\sigma_{\dot{q}}$, $\sigma_{\mu}$, $\sigma_{\mu'}$: Gaussian noise variances in the generative model of the sensory data $\sigma_{q}, \sigma_{\dot{q}}$ and the reference state dynamics $\sigma_{\mu}, \sigma_{\mu'}$. These variances represent the confidence in the controller's sensory position and velocity input and the confidence in the reference velocity and acceleration, respectively [^1].
 
 - $\kappa_{\mu}$, $\kappa_{a}$: The gradient descent learning rates for the reference state update and control actions, respectively. These are responsible for how fast the VFE is minimised through perception and action. Larger learning rates allow for a faster minimisation, although this can also cause gradient descent overshoot.
 
-- $𝓚_{p}$: The proportional parameter that distinguishes the ReAIC from the AIC defined in [1]. It influences the reference model speed at which the joints should be steered toward the goal position $\mu_{g}$.
+- $𝓚_{p}$: The proportional parameter that distinguishes the ReAIC from the AIC defined in [^1]. It influences the reference model speed at which the joints should be steered toward the goal position $\mu_{g}$.
 
 ### Tuning Procedure:
 

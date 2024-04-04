@@ -7,15 +7,16 @@ The code within this repository was adapted from the [THIS GitHub repository](ht
 <div align="center">
   <img src="./images/Interbotix_Pincher.png" alt="Interbotix PincherX 150, 5-DOF Manipulator">
 </div>
-
-## Performance Comparison - ReAIC vs. AIC
-
-<div style="display:flex;">
-  <img src="./images/ReAIC_2.gif" style="display:inline-block; width:50%;">
-  <img src="./images/AIC_2.gif" style="display:inline-block; width:50%;">
+<div align="center">
+  <em>Interbotix PincherX 150</em>
 </div>
 
-                  ReAIC                                 AIC
+
+## Performance Comparison - ReAIC vs. AIC
+<div align="center">
+  <img src="./images/ReAIC_2.gif" style="display:inline-block; width:45%;"> 
+  <img src="./images/AIC_2.gif" style="display:inline-block; width:45%;">
+</div>
 
 ## ReAIC
 
@@ -27,20 +28,20 @@ The ReAIC requires seven tuning parameters per joint, which may seem like a lot;
 
 - $\kappa_{\mu}$, $\kappa_{a}$: The gradient descent learning rates for the reference state update and control actions, respectively. These are responsible for how fast the VFE is minimised through perception and action. Larger learning rates allow for a faster minimisation, although this can also cause gradient descent overshoot.
 
-- $\mathcal{K}_{p}$: The proportional parameter that distinguishes the ReAIC from the AIC defined in [1]. It influences the reference model speed at which the joints should be steered toward the goal position $\mu_{g}$.
+- 𝓚<sub>p</sub>: The proportional parameter that distinguishes the ReAIC from the AIC defined in [1]. It influences the reference model speed at which the joints should be steered toward the goal position $\mu_{g}$.
 
 ### Tuning Procedure:
 
-1) The variances $\sigma_{q}, \sigma_{\dot{q}}, \sigma_{\mu}, \sigma_{\mu'}$ and the proportional parameter $\mathcal{K}_{p}$ are set to one, indicating high confidence in both the sensory input and reference state and setting a slow settling time.
+1) The variances $\sigma_{q}, \sigma_{\dot{q}}, \sigma_{\mu}, \sigma_{\mu'}$ and the proportional parameter 𝓚<sub>p</sub> are set to one, indicating high confidence in both the sensory input and reference state and setting a slow settling time.
 
 2) The control actions are disabled by setting the learning rate $\kappa_{a}$ to zero.
 
 3) The learning rate for the reference state update $\kappa_{\mu}$ is incremented such that the state estimate converges to a stable value in a static case within 20 - \qty[mode = text]{30}{\milli s}. This is done by plotting the reference joint position $\mu$ during a step response while the control action has been disabled.
 
-4) A desired settling time $t_{s}$ can be set by increasing the proportional parameter $\mathcal{K}_{p}$ with the following formula:
-
-
-    $\mathcal{K}_{p} = \frac{5 (\mu_{g} - y_{q})}{t_{s}}$  
+4) A desired settling time $t_{s}$ can be set by increasing the proportional parameter 𝓚<sub>p</sub> with the following formula:
+    
+    $\mathcal{K}_{p} = \frac{5(\mu_{g}-y_{q})}{t_{s}}$  
+   
 
     Increasing $\mathcal{K}_{p}$ to large values will result in overshoot behaviour in the real system (see Section~\ref{subsec:Tuning_influences}). It is suggested to start with a reasonable desired settling time.
 

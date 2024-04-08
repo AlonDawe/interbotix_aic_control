@@ -15,6 +15,7 @@ rcParams['font.serif'] = ['cmr10']
 rcParams['font.size'] = 14
 #rcParams['axes.unicode_minus'] = False
 rcParams['axes.formatter.use_mathtext'] = True
+rcParams['text.usetex'] = True
 
 def save_to_csv(column_headers, column_data, filename):
     with open(filename, 'w', newline='') as csvfile:

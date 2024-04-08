@@ -15,6 +15,7 @@ rcParams['font.serif'] = ['cmr10']
 rcParams['font.size'] = 14
 #rcParams['axes.unicode_minus'] = False
 rcParams['axes.formatter.use_mathtext'] = True
+rcParams['text.usetex'] = True
 
 def save_to_csv(column_headers, column_data, filename):
     with open(filename, 'w', newline='') as csvfile:
@@ -53,19 +54,19 @@ def settl_time(data, time, ref):
 
 # Step Response
 #######bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_FINAL_I_2024-01-30-09-50-29.bag"
-bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_CHANGING_I_FINAL_2024-03-04-11-44-35.bag"
-bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_FINAL_2023-12-12-11-03-09.bag"
-bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_FINAL_2024-01-30-09-44-56.bag"
+#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_CHANGING_I_FINAL_2024-03-04-11-44-35.bag"
+#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_FINAL_2023-12-12-11-03-09.bag"
+#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_FINAL_2024-01-30-09-44-56.bag"
 ######bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AFC_FINAL_2024-01-25-10-20-46.bag"
-bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AFC_CHANGING_I_FINAL_2024-03-04-15-17-29.bag"
+#bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AFC_CHANGING_I_FINAL_2024-03-04-15-17-29.bag"
 
 # Loaded Step Response
 ######bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_LOAD_FINAL_I_2024-01-30-09-59-50.bag"
-#bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_LOAD_CHANGING_I_FINAL_2024-03-04-11-47-43.bag"
-#bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_LOAD_FINAL_2023-12-12-11-08-49.bag"
-#bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_LOAD_FINAL_2024-01-30-10-09-09.bag"
+bag_path1 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/PID_LOAD_CHANGING_I_FINAL_2024-03-04-11-47-43.bag"
+bag_path2 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AIC_LOAD_FINAL_2023-12-12-11-08-49.bag"
+bag_path3 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/ReAIC_LOAD_FINAL_2024-01-30-10-09-09.bag"
 #######bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AFC_LOAD_FINAL_2024-01-25-10-29-30.bag"
-#bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AFC_LOAD_CHANGING_I_FINAL_2024-03-04-15-11-36.bag"
+bag_path4 = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/wrist_ang/AFC_LOAD_CHANGING_I_FINAL_2024-03-04-15-11-36.bag"
 
 # Open the bag file
 bag1 = rosbag.Bag(bag_path1)

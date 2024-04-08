@@ -11,7 +11,7 @@
 
 #include "PID.h"
 
-// Constant for class AIC constructor to define which robot to control
+// Constant for class PID constructor to define which robot to control
 const int robot = 1;
 
 int main(int argc, char **argv)
@@ -35,9 +35,9 @@ int main(int argc, char **argv)
   controlInput2[3] = 0.0;
   controlInput2[4] = 0.0;
 
-  // Object of the class AIC which will take care of everything
+  // Object of the class PID which will take care of everything
   PID PID_controller(robot);
-  // Set desired position in the AIC class
+  
   ros::Rate rate(1000);
   while (count<1000){
     // Manage all the callbacks and so read sensors

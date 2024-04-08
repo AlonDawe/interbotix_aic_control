@@ -5,7 +5,7 @@
  * 
  * Created: 13th October, 2023
  * 
- * Description: Class to perform Re-Active Inference Control of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
+ * Description: Header file to perform Re-Active Inference Control of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
  * 
  * Original Author: Corrado Pezzato, TU Delft, DCSC 
  * (https://github.com/cpezzato/panda_simulation/blob/master/panda_control/include/AIC.h)
@@ -47,7 +47,7 @@ public:
   void initVariables();
   // Main method which minimises the free-energy using gradient descent
   void minimiseF(int stop);
-  // Calculate and send the torque commands to compute actions and further minimise the free-energy
+  // Calculate and send the control commands to compute actions and further minimise the free-energy
   void computeActions(int stop);
   // Support method to control the program flow. Data ready returns one when the encoders has been read
   int dataReady();
@@ -62,15 +62,15 @@ public:
 
 private:
 
-  // Variances associated with the active inference controller and the confidence relative to sensory input and beliefs
+  // Variances associated with the ReAIC and the confidence relative to sensory input and beliefs
   double var_q, var_qdot, var_mu, var_muprime, var_q_d, var_qdot_d;
   // Precision matrices, diagonal matrices with the inverce of the variance
   Eigen::Matrix<double, 5, 5> SigmaP_yq0, SigmaP_yq1, SigmaP_mu, SigmaP_muprime, SigmaP_yq0_d, SigmaP_yq1_d, k_a_adapt, k_mu_adapt, k_p_adapt;
-  // Beliefs about the states and their derivatives mu, mu', mu'', column vectors of 7 elements
+  // Beliefs about the states and their derivatives mu, mu', mu'', column vectors of 5 elements
   Eigen::Matrix<double, 5, 1> mu, mu_p, mu_pp, mu_dot, mu_dot_p, mu_dot_pp, jointPos, jointVel;
-  // Desired robot's states, column vector of 7 elements
+  // Desired robot's states and error column vector of 5 elements
   Eigen::Matrix<double, 5, 1> mu_d, mu_p_d, error;
-  // Control actions,  column vector of 7 elements
+  // Control actions,  column vector of 5 elements
   Eigen::Matrix<double, 5, 1> u;
   // Learning rates and integration step for the ReAIC
   double k_mu, k_a, h, Kp, k_mu_original;
@@ -84,9 +84,9 @@ private:
   ros::Publisher singlePub, groupPub, tauPub1, tauPub2, tauPub3, tauPub4, tauPub5, tauPub6, tauPub7, IFE_pub;
   // Subscriber for proprioceptive sensors (i.e. from joint_states)
   ros::Subscriber sensorSub;
-  // Support variables to contain the torques for the joints
+  // Support variables to contain the torques for the joints in gazebo
   std_msgs::Float64 tau1, tau2, tau3, tau4, tau5, tau6, tau7, F;
-  // Values for direct kinematics computation using DH parameters
+  // Values for direct kinematics computation using DH parameters (NOT USED)
   Eigen::Matrix<double, 7, 1> DH_a, DH_d, DH_alpha;
   Eigen::Matrix<double, 4, 4> DH_T, DH_A, T;
   Eigen::Matrix<double, 3, 1> eePosition;

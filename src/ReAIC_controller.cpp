@@ -27,7 +27,13 @@ int main(int argc, char **argv)
   int cycles = 0;
   double t = 0.0;
   double sinusoidalPos = 0.0;
-  const int joint = 3;
+  const int joint = 3; 
+
+  // joint 0 --> Waist
+  // joint 1 --> Shoulder
+  // joint 2 --> Elbow
+  // joint 3 --> Wrist Angle
+  // joint 4 --> Wrist Rotation
 
   //  Variables for sinusoidal trajectory
   const double frequency = 0.1;  // Frequency of the sinusoidal motion (adjust as needed)
@@ -60,7 +66,7 @@ int main(int argc, char **argv)
 
   // Object of the class ReAIC which will take care of everything
   ReAIC ReAIC_controller(robot);
-  // Set desired position in the ReAIC class
+  
   ros::Rate rate(1000);
   while (count<1000){
     // Manage all the callbacks and so read sensors
@@ -69,10 +75,10 @@ int main(int argc, char **argv)
     rate.sleep();
   }
 
+  // Set goal position in the ReAIC class
   ReAIC_controller.setGoal(desiredPos1);
 
   // Main loop
-  
   while (ros::ok() && cycles <= 31000){
     // Manage all the callbacks and so read sensors
     ros::spinOnce();

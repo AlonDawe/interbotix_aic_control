@@ -29,6 +29,12 @@ int main(int argc, char **argv)
   double sinusoidalPos = 0.0;
   const int joint = 4;
 
+  // joint 0 --> Waist
+  // joint 1 --> Shoulder
+  // joint 2 --> Elbow
+  // joint 3 --> Wrist Angle
+  // joint 4 --> Wrist Rotation
+
   //  Variables for sinusoidal trajectory
   const double frequency = 0.1;  // Frequency of the sinusoidal motion (adjust as needed)
   const double amplitude = 1.5;  // Amplitude of the sinusoidal motion (adjust as needed)
@@ -63,7 +69,7 @@ int main(int argc, char **argv)
 
   // Object of the class PID which will take care of everything
   PID PID_controller(robot);
-  // Set desired position in the PID class
+  
   ros::Rate rate(1000);
   while (count<1000){
     // Manage all the callbacks and so read sensors
@@ -72,10 +78,10 @@ int main(int argc, char **argv)
     rate.sleep();
   }
 
+  // Set desired position in the PID class
   PID_controller.setGoal(desiredPos1);
 
   // Main loop
-  
   while (ros::ok() && cycles <= 31000){
     // Manage all the callbacks and so read sensors
     ros::spinOnce();
@@ -88,31 +94,31 @@ int main(int argc, char **argv)
       if (cycles < 3000){
         PID_controller.setGoal(desiredPos1);
       }
-
+      // Step 1
       if (cycles >= 3000 && cycles < 8000){
         PID_controller.setGoal(desiredPos2);
       }
-
+      // Step 2
       if (cycles >= 8000 && cycles < 13000){
         PID_controller.setGoal(desiredPos3);
       }
-
+      // Step 3
       if (cycles >= 13000 && cycles < 18000){
         PID_controller.setGoal(desiredPos1);
       }
-
+      // Step 4
       if (cycles >= 18000 && cycles < 21000){
         PID_controller.setGoal(desiredPos4);
       }
-
+      // Step 5
       if (cycles >= 21000 && cycles < 24000){
         PID_controller.setGoal(desiredPos5);
       }
-
+      // Step 6
       if (cycles >= 24000 && cycles < 27000){
         PID_controller.setGoal(desiredPos6);
       }
-
+      // Step 7
       if (cycles >= 27000 && cycles < 31000){
         PID_controller.setGoal(desiredPos1);
       }

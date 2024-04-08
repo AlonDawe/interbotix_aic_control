@@ -8,6 +8,7 @@ from matplotlib import cm
 rcParams['font.family'] = 'serif'
 rcParams['font.serif'] = ['cmr10']
 rcParams['font.size'] = 14
+rcParams['text.usetex'] = True
 #rcParams['axes.unicode_minus'] = False
 rcParams['axes.formatter.use_mathtext'] = True
 # Set font and size to match LaTeX document
@@ -68,7 +69,12 @@ min_value_axis_0 = np.min(averaged_array[:, :, 0])
 min_value_axis_1 = np.min(averaged_array[:, :, 1])
 min_value_axis_2 = np.min(averaged_array[:, :, 2])
 
+zero_indices = np.where(averaged_array[:, :, 2] == min_value_axis_2)
+
+print(zero_indices)
+
 min_values = [min_value_axis_0, min_value_axis_1, min_value_axis_2]
+
 
 
 
@@ -76,8 +82,10 @@ min_indices_axis_0 = np.unravel_index(np.argmin(averaged_array[:, :, 0]), averag
 min_indices_axis_1 = np.unravel_index(np.argmin(averaged_array[:, :, 1]), averaged_array[:, :, 1].shape)
 min_indices_axis_2 = np.unravel_index(np.argmin(averaged_array[:, :, 2]), averaged_array[:, :, 2].shape)
 
+
 min_indices = [min_indices_axis_0, min_indices_axis_1, min_indices_axis_2]
 
+print()
 
 print("ITAE")
 print(min_value_axis_0)
@@ -154,7 +162,7 @@ for i, ax in enumerate(axes):
 #fig2.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/std_performance_metrics.pdf')
 
 #performance_metric = ["ITAE", "Settling Time (s)", "Overshoot (%)"]
-performance_metric = ["ITAE", "$t_{s}$ (s)", "$M_{p}$ (%)"]
+performance_metric = ["ITAE", "$t_{s}$ (s)", "$M_{p}$ (\%)"]
 performance_metric_name = ["ITAE_Score", "Settling_Time", "Overshoot"]
 plt.rcParams['grid.color'] = "whitesmoke"
 for i in range(3):
@@ -185,7 +193,9 @@ for i in range(3):
     #ax.plot_wireframe(kp_mesh, ka_mesh, averaged_array[:, :, i], cmap='viridis')
     # Set labels
     if i != 2:
-        ax.scatter((min_indices[i][1]+1), (min_indices[i][0]+1), min_values[i], marker='o', c='r', s=35, zorder=1)
+        ax.scatter((min_indices[i][1]+1), (min_indices[i][0]+1), min_values[i], marker='o', color=(0, 0.678, 0.937), s=35, zorder=1, depthshade=False)
+    else:
+        ax.scatter((zero_indices[1]+1), (zero_indices[0]+1), min_values[i], marker='o', color=(0, 0.678, 0.937), s=35, zorder=1, depthshade=False)
     ax.set_xlabel('$\kappa_{a}$')
     ax.set_ylabel('$\mathcal{K}_{p}$')
     ax.zaxis.set_rotate_label(False)  # disable automatic rotation

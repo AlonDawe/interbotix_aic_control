@@ -5,6 +5,9 @@ from matplotlib import rcParams
 import csv
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes,  mark_inset
 from scipy.io import loadmat
+import matplotlib as mpl
+
+
 
 # Set font and size to match LaTeX document
 #rcParams['font.family'] = 'serif'
@@ -13,8 +16,11 @@ from scipy.io import loadmat
 rcParams['font.family'] = 'serif'
 rcParams['font.serif'] = ['cmr10']
 rcParams['font.size'] = 14
+rcParams['text.usetex'] = True
 #rcParams['axes.unicode_minus'] = False
 rcParams['axes.formatter.use_mathtext'] = True
+
+#mpl.rcParams.update(mpl.rcParamsDefault)
 
 def save_to_csv(column_headers, column_data, filename):
     with open(filename, 'w', newline='') as csvfile:
@@ -693,7 +699,7 @@ subt2 = np.ones(len(REF_timestamps))
 #print(len(subt))
 
 # Plot joint position on the first subplot
-ax1.step(t_step, y_step, '-', label='$T_{cl}(s)$')
+ax1.step(t_step, y_step, '-', label='$T(s)$')
 ax1.step(time[2]-3*subt, data[2], '-', label='Waist Joint')
 ax1.step(REF_timestamps-3*subt2, REF_datavalues, color='k', linestyle='--', label='$\mu_{g}$', zorder=0)
 #ax1.hlines(0.0, 0.0, xmax=30.0, color='k', linestyle='--')
@@ -703,7 +709,7 @@ ax1.legend(ncol=3, fontsize='small', frameon=False, loc='upper center', bbox_to_
 ax1.grid(True)  # Turn on the grid for the first subplot
 ax1.set_xlim(0, 3)
 ax1.set_ylim(0, 1)
-fig8.savefig('/home/alon/Documents/thesis/Latex Experiment Graphs/Gs_vs_real.pdf')
+#fig8.savefig('/home/alon/Documents/thesis/Latex Experiment Graphs/Gs_vs_real.pdf')
 
 
 # Show the plot

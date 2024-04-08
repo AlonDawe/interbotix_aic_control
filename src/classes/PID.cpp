@@ -19,10 +19,11 @@
   // Constructor which takes as argument the publishers and initialises the private ones in the class
   PID::PID(int whichRobot){
 
-      // Initialize publishers on the topics /robot1/panda_joint*_controller/command for the joint efforts
+      // Initialize publishers on the topics 
+      // Real robot publishers
       groupPub = nh.advertise<interbotix_xs_msgs::JointGroupCommand>("/px150/commands/joint_group", 20);
       singlePub = nh.advertise<interbotix_xs_msgs::JointSingleCommand>("/px150/commands/joint_single", 20);
-
+      // Gazebo publishers
       tauPub1 = nh.advertise<std_msgs::Float64>("/px150/waist_controller/command", 20);
       tauPub2 = nh.advertise<std_msgs::Float64>("/px150/shoulder_controller/command", 20);
       tauPub3 = nh.advertise<std_msgs::Float64>("/px150/elbow_controller/command", 20);
@@ -31,8 +32,12 @@
       //tauPub6 = nh.advertise<std_msgs::Float64>("/px150/Left_finger_controller/command", 20);
       //tauPub7 = nh.advertise<std_msgs::Float64>("/px150/right_finger_controller/command", 20);
 
+      // Subscriber to the joint states
       sensorSub = nh.subscribe("/px150/joint_states", 1, &PID::jointStatesCallback, this);
+      
+      // Publisher for the desired state
       mu_desired_pub = nh.advertise<std_msgs::Float64MultiArray>("mu_desired", 10);
+    
     // Initialize the variables for thr PID
     PID::initVariables();
   }
@@ -71,12 +76,12 @@
     // Support variable
     dataReceived = 0;
 
-    // Precision matrices (first set them to zero then populate the diagonal)
+    // first set them to zero then populate the diagonal
     Kp = Eigen::Matrix<double, 5, 5>::Zero();
     Kd = Eigen::Matrix<double, 5, 5>::Zero();
     Ki = Eigen::Matrix<double, 5, 5>::Zero();
   
-    // Begin Tuning parameters of PID
+    // Begin Tuning parameters of PID (Read from ./config/PID_tuning.yaml)
     //---------------------------------------------------------------
     
     // Variances associated with the beliefs and the sensory inputs
@@ -105,9 +110,11 @@
     // Integration step
     h = 0.001;
 
+    // Resize Float64MultiArray messages
     mu_des.data.resize(5);
   }
 
+  // compute control actions
   void   PID::computeActions(){
     //PID::adjust_learning_rate();
     
@@ -115,8 +122,11 @@
     //se = se + error*h;
     for( int i = 0; i < se.rows(); i = i + 1 ) {
       if(u(i) < 885.0 and u(i) > -885.0){
+        // is the joint angle within error tolerance? Seek prevention.
         if(abs(error(i)) < 0.01 and jointVel(i) == 0.0){
           se(i) = se(i);
+        // only start integral error update once within 0.5 rad of goal.
+        // Additional integral windup revention  
         }else if (abs(error(i)) < 0.5){
           se(i) = se(i) + error(i)*h;
         }
@@ -184,24 +194,25 @@
     //groupPub.publish(a);
     
 
-    // Set the toques from u and publish
+    // Set the toques from u and publish for gazebo setup
     tau1.data = u(0); tau2.data = u(1); tau3.data = u(2); tau4.data = u(3);
     tau5.data = u(4); //tau6.data = u(5); //tau7.data = u(6);
     // Publishing
     tauPub1.publish(tau1); tauPub2.publish(tau2); tauPub3.publish(tau3);
-    tauPub4.publish(tau4); //tauPub5.publish(tau5); //tauPub6.publish(tau6);
+    tauPub4.publish(tau4); tauPub5.publish(tau5); //tauPub6.publish(tau6);
     //tauPub7.publish(tau7);
   }
 
+  // Method to control if the joint states have been received already,
+  // used in the main function
   int PID::dataReady(){
-    // Method to control if the joint states have been received already,
-    // used in the main function
     if(dataReceived==1)
       return 1;
     else
       return 0;
   }
 
+  // function to publish the goal states
   void PID::setGoal(std::vector<double> desiredPos){
     for(int i=0; i<desiredPos.size(); i++){
       mu_d(i) = desiredPos[i];
@@ -210,6 +221,7 @@
     mu_desired_pub.publish(mu_des);
   }
 
+  // function to perform impulse response on the waist joint
   void PID::setStep(std::vector<double> controlInput){
     for(int i=0; i<controlInput.size(); i++){
       u(i) = 300*(controlInput[i]);

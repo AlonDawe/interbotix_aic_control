@@ -43,6 +43,8 @@
       beliefs_mu_pub = nh.advertise<std_msgs::Float64MultiArray>("beliefs_mu", 10);
       beliefs_mu_p_pub = nh.advertise<std_msgs::Float64MultiArray>("beliefs_mu_p", 10);
       beliefs_mu_pp_pub = nh.advertise<std_msgs::Float64MultiArray>("beliefs_mu_pp", 10);
+
+      // Publisher for the desired state
       mu_desired_pub = nh.advertise<std_msgs::Float64MultiArray>("mu_desired", 10);
 
     // Initialize the variables for the ReAIC
@@ -85,7 +87,7 @@
     // Simulate gaussian noise on the sensors
     //std::vector<double> noise = ReAIC::generateNormalRandomNumbers(0.0, 0.1);
 
-    // Save joint values
+    // Save joint sensor values
     for( int i = 0; i < 5; i++ ) {
       jointPos(i) = msg->position[i];// + noise[i];
       jointVel(i) = msg->velocity[i];// + noise[i];
@@ -123,11 +125,11 @@
     // Proportional tuning parameter for the ReAIC
     k_p_adapt = Eigen::Matrix<double, 5, 5>::Zero();
 
-    // Begin Tuning parameters of AIC
+    // Begin tuning parameters of ReAIC (Read from ./config/ReAIC_tuning.yaml)
     //---------------------------------------------------------------
 
     // Variances associated with the beliefs and the sensory inputs
-    ROS_INFO("Setting AIC parameters from parameter space");
+    ROS_INFO("Setting ReAIC parameters from parameter space");
     nh.getParam("var_mu", var_mu);
     nh.getParam("var_muprime", var_muprime);
     nh.getParam("var_q", var_q);
@@ -219,9 +221,12 @@
     beliefs_mu_pp_pub.publish(AIC_mu_pp);
   }
 
+  // Compute control actions through gradient descent of F
   void   ReAIC::computeActions(int stop){
-    ReAIC::adjust_learning_rate();
-    // Compute control actions through gradient descent of F
+
+    // learning rate is set to zero when within +-0.01 rad of goal
+    ReAIC::adjust_learning_rate();  
+    
     if (stop == 0){
       u = u-590.0*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu)); // 590 = torque -> PWM conversion factor
     } else {
@@ -282,10 +287,10 @@
     //  << " Name= " << a.name
     //  << " Cmd= " << a.cmd[0] << " " << a.cmd[1] << " " << a.cmd[2] << " " << a.cmd[3] << " " << a.cmd[4]);
     
-    // Publish the message.
+    // Publish the message as a group.
     //groupPub.publish(a);
     
-    // Set the toques from u and publish
+    // Set the toques from u and publish for gazebo setup
     tau1.data = u(0); tau2.data = u(1); tau3.data = u(2); tau4.data = u(3);
     tau5.data = u(4); //tau6.data = u(5); //tau7.data = u(6);
     // Publishing
@@ -294,15 +299,16 @@
     //tauPub7.publish(tau7);
   }
 
+  // Method to observe if the joint states have been received already,
+  // used in the main function
   int ReAIC::dataReady(){
-    // Method to control if the joint states have been received already,
-    // used in the main function
     if(dataReceived==1)
       return 1;
     else
       return 0;
   }
 
+  // function to publish the goal states
   void ReAIC::setGoal(std::vector<double> desiredPos){
     for(int i=0; i<desiredPos.size(); i++){
       mu_d(i) = desiredPos[i];
@@ -312,10 +318,12 @@
     mu_desired_pub.publish(mu_des);
   }
 
+  // function to return the sensory prediction error
   std_msgs::Float64MultiArray  ReAIC::getSPE(){
     return(SPE);
   }
 
+  // funtion to set the control action learning rate to zero when within 0.01 rad of the goal
   void ReAIC::adjust_learning_rate() {
     error = jointPos - mu_d;
     

@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 
   // Object of the class AFC which will take care of everything
   AFC AFC_controller(robot);
-  // Set desired position in the AFC class
+  
   ros::Rate rate(1000);
   while (count<1000){
     // Manage all the callbacks and so read sensors
@@ -72,10 +72,10 @@ int main(int argc, char **argv)
     rate.sleep();
   }
 
+  // Set desired position in the AFC class
   AFC_controller.setGoal(desiredPos1);
 
   // Main loop
-  
   while (ros::ok() && cycles <= 31000){
     // Manage all the callbacks and so read sensors
     ros::spinOnce();
@@ -88,31 +88,31 @@ int main(int argc, char **argv)
       if (cycles < 3000){
         AFC_controller.setGoal(desiredPos1);
       }
-
+      // Step 1
       if (cycles >= 3000 && cycles < 8000){
         AFC_controller.setGoal(desiredPos2);
       }
-
+      // Step 2 
       if (cycles >= 8000 && cycles < 13000){
         AFC_controller.setGoal(desiredPos3);
       }
-
+      // Step 3
       if (cycles >= 13000 && cycles < 18000){
         AFC_controller.setGoal(desiredPos1);
       }
-
+      // Step 4
       if (cycles >= 18000 && cycles < 21000){
         AFC_controller.setGoal(desiredPos4);
       }
-
+      // Step 5 
       if (cycles >= 21000 && cycles < 24000){
         AFC_controller.setGoal(desiredPos5);
       }
-
+      // Step 6
       if (cycles >= 24000 && cycles < 27000){
         AFC_controller.setGoal(desiredPos6);
       }
-
+      // Step 7
       if (cycles >= 27000 && cycles < 31000){
         AFC_controller.setGoal(desiredPos1);
       }

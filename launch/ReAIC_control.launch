@@ -2,5 +2,5 @@
     <node pkg="interbotix_aic_control" type="interbotix_aic_control_ReAIC_node" name="interbotix_aic_control_ReAIC_node" required="true"/>
     <rosparam command="load" file="$(find interbotix_aic_control)/config/ReAIC_tuning.yaml" />
 
-    <!--node pkg="rosbag" name="record" type="record" args="-a -o /home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/ReAIC_VISC_FINAL_new.bag" required="true"/-->
+    <node pkg="rosbag" name="record" type="record" args="-a -o /home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/ReAIC_VISC_FINAL_new.bag" required="true"/>
 </launch>

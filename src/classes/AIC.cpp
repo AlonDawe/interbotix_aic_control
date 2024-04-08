@@ -5,7 +5,7 @@
  * 
  * Created: 13th October, 2023
  * 
- * Description: Class to perform Re-Active Inference Control of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
+ * Description: Class to perform Active Inference Control of the 5-DOF Interbotix PincherX 150 robotic manipulator using ROS.
  * 
  * Original Author: Corrado Pezzato, TU Delft, DCSC 
  * (https://github.com/cpezzato/panda_simulation/blob/master/panda_control/src/classes/AIC.cpp)
@@ -19,10 +19,11 @@
   // Constructor which takes as argument the publishers and initialises the private ones in the class
   AIC::AIC(int whichRobot){
 
-      // Initialize publishers on the topics /robot1/panda_joint*_controller/command for the joint efforts
+      // Initialize publishers on the topics
+      // Real robot publishers
       groupPub = nh.advertise<interbotix_xs_msgs::JointGroupCommand>("/px150/commands/joint_group", 20);
       singlePub = nh.advertise<interbotix_xs_msgs::JointSingleCommand>("/px150/commands/joint_single", 20);
-
+      // Gazebo publishers
       tauPub1 = nh.advertise<std_msgs::Float64>("/px150/waist_controller/command", 20);
       tauPub2 = nh.advertise<std_msgs::Float64>("/px150/shoulder_controller/command", 20);
       tauPub3 = nh.advertise<std_msgs::Float64>("/px150/elbow_controller/command", 20);
@@ -31,7 +32,9 @@
       //tauPub6 = nh.advertise<std_msgs::Float64>("/px150/Left_finger_controller/command", 20);
       //tauPub7 = nh.advertise<std_msgs::Float64>("/px150/right_finger_controller/command", 20);
       
+      // Subscriber to the joint states
       sensorSub = nh.subscribe("/px150/joint_states", 1, &AIC::jointStatesCallback, this);
+      
       // Publisher for the free-energy and sensory prediction errors
       IFE_pub = nh.advertise<std_msgs::Float64>("px150_free_energy", 10);
       SPE_pub = nh.advertise<std_msgs::Float64MultiArray>("px150_SPE", 10);
@@ -40,9 +43,11 @@
       beliefs_mu_pub = nh.advertise<std_msgs::Float64MultiArray>("beliefs_mu", 10);
       beliefs_mu_p_pub = nh.advertise<std_msgs::Float64MultiArray>("beliefs_mu_p", 10);
       beliefs_mu_pp_pub = nh.advertise<std_msgs::Float64MultiArray>("beliefs_mu_pp", 10);
+      
+      // Publisher for the desired state
       mu_desired_pub = nh.advertise<std_msgs::Float64MultiArray>("mu_desired", 10);
 
-    // Initialize the variables for thr AIC
+    // Initialize the variables for the AIC
     AIC::initVariables();
   }
   AIC::~AIC(){}
@@ -63,7 +68,7 @@
     //jointPos(5) = msg->position[8];
     //jointVel(5) = msg->velocity[8];
 
-    // Save joint values
+    // Save joint sensor values
     for( int i = 0; i < 5; i++ ) {
       jointPos(i) = msg->position[i];
       jointVel(i) = msg->velocity[i];
@@ -84,14 +89,18 @@
     dataReceived = 0;
 
     // Precision matrices (first set them to zero then populate the diagonal)
+    // Variances associated with the sensory inputs
     SigmaP_yq0 = Eigen::Matrix<double, 5, 5>::Zero();
     SigmaP_yq1 = Eigen::Matrix<double, 5, 5>::Zero();
+    
+    // Variances associated with the beliefs
     SigmaP_mu = Eigen::Matrix<double, 5, 5>::Zero();
     SigmaP_muprime = Eigen::Matrix<double, 5, 5>::Zero();
 
+    // Learning rate for the gradient descent
     k_a_adapt = Eigen::Matrix<double, 5, 5>::Zero();
 
-    // Begin Tuning parameters of AIC
+    // Begin Tuning parameters of AIC (Read from ./config/AIC_tuning.yaml)
     //---------------------------------------------------------------
 
     // Variances associated with the beliefs and the sensory inputs
@@ -100,6 +109,8 @@
     nh.getParam("var_muprime", var_muprime);
     nh.getParam("var_q", var_q);
     nh.getParam("var_qdot", var_qdot);
+
+    // Learning rates for the gradient descent
     nh.getParam("k_mu", k_mu);
     nh.getParam("k_a", k_a);
 
@@ -174,14 +185,18 @@
     beliefs_mu_pp_pub.publish(AIC_mu_pp);
   }
 
+  // Compute control actions through gradient descent of F
   void   AIC::computeActions(){
+
+    // learning rate is set to zero when within +-0.01 rad of goal
     AIC::adjust_learning_rate();
-    // Compute control actions through gradient descent of F
+    
     for (int i=0;i<1;i++){
       u = u-590*h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu));
       //u = u-h*k_a_adapt*(SigmaP_yq1*(jointVel-mu_p)+SigmaP_yq0*(jointPos-mu));
     }
 
+    // Prevent control action windup
     for( int i = 0; i < u.rows(); i = i + 1 ) {
       if (u(i) > 885.0 ){
         u(i) = 885.0;
@@ -225,27 +240,28 @@
     //singlePub.publish(wrist_rot_msg);
 
 
-    // Publish the message.
+    // Publish the message as a group.
     //groupPub.publish(a);
     
-    // Set the toques from u and publish
+    // Set the toques from u and publish for gazebo setup
     tau1.data = u(0); tau2.data = u(1); tau3.data = u(2); tau4.data = u(3);
     tau5.data = u(4); //tau6.data = u(5); //tau7.data = u(6);
     // Publishing
     tauPub1.publish(tau1); tauPub2.publish(tau2); tauPub3.publish(tau3);
-    tauPub4.publish(tau4); //tauPub5.publish(tau5); //tauPub6.publish(tau6);
+    tauPub4.publish(tau4); tauPub5.publish(tau5); //tauPub6.publish(tau6);
     //tauPub7.publish(tau7);
   }
 
+  // Method to control if the joint states have been received already,
+  // used in the main function
   int AIC::dataReady(){
-    // Method to control if the joint states have been received already,
-    // used in the main function
     if(dataReceived==1)
       return 1;
     else
       return 0;
   }
 
+  // function to publish the goal states
   void AIC::setGoal(std::vector<double> desiredPos){
     for(int i=0; i<desiredPos.size(); i++){
       mu_d(i) = desiredPos[i];
@@ -255,10 +271,12 @@
 
   }
 
+  // function to return the sensory prediction error
   std_msgs::Float64MultiArray  AIC::getSPE(){
     return(SPE);
   }
 
+  // funtion to set the control action learning rate to zero when within 0.01 rad of the goal
   void AIC::adjust_learning_rate() {
     error = jointPos - mu_d;
     

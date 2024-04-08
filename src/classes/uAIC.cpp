@@ -18,12 +18,13 @@
 
   // Constructor which takes as argument the publishers and initialises the private ones in the class
   uAIC::uAIC(int whichRobot){
-    // Initialize the variables for thr uAIC
-    uAIC::initVariables();
-      // Torque publisher
+
+      // Initialize publishers on the topics
+      // Real robot publishers
       groupPub = nh.advertise<interbotix_xs_msgs::JointGroupCommand>("/px150/commands/joint_group", 20);
       singlePub = nh.advertise<interbotix_xs_msgs::JointSingleCommand>("/px150/commands/joint_single", 20);
 
+      // Gazebo publishers
       tauPub1 = nh.advertise<std_msgs::Float64>("/px150/waist_controller/command", 20);
       tauPub2 = nh.advertise<std_msgs::Float64>("/px150/shoulder_controller/command", 20);
       tauPub3 = nh.advertise<std_msgs::Float64>("/px150/elbow_controller/command", 20);
@@ -32,16 +33,18 @@
       //tauPub6 = nh.advertise<std_msgs::Float64>("/px150/Left_finger_controller/command", 20);
       //tauPub7 = nh.advertise<std_msgs::Float64>("/px150/right_finger_controller/command", 20);
 
-      //Subscriber
+      //Subscriber to the joint states
       sensorSub = nh.subscribe("/px150/joint_states", 1, &uAIC::jointStatesCallback, this);
 
-      // Publisher beliefs
+      // Publishers for beliefs
       beliefs_mu_pub = nh.advertise<std_msgs::Float64MultiArray>("/beliefs_mu", 20);
       beliefs_mu_p_pub = nh.advertise<std_msgs::Float64MultiArray>("/beliefs_mu_p", 20);
 
       // Listener to goals
       goal_mu_dSub = nh.subscribe("/desired_state", 5, &uAIC::setDesiredState, this);
-
+    
+    // Initialize the variables for the uAIC
+    uAIC::initVariables();
   }
   uAIC::~uAIC(){}
 
@@ -55,6 +58,7 @@
     }
   }
 
+  // Callback function for the subscriber
   void   uAIC::jointStatesCallback(const sensor_msgs::JointState::ConstPtr& msg)
   {
 
@@ -70,7 +74,7 @@
     //jointPos(4) = msg->position[7];
     //jointVel(4) = msg->velocity[7];
 
-    // Save joint values
+    // Save joint sensor values
     for( int i = 0; i < 5; i++ ) {
       jointPos(i) = msg->position[i];
       jointVel(i) = msg->velocity[i];
@@ -93,15 +97,20 @@
     dataReceived = 0;
 
     // Precision matrices (first set them to zero then populate the diagonal)
+    // Variances associated with the sensory inputs
     SigmaP_yq0 = Eigen::Matrix<double, 5, 5>::Zero();
     SigmaP_yq1 = Eigen::Matrix<double, 5, 5>::Zero();
+    
+    // Variances associated with the beliefs
     SigmaP_mu = Eigen::Matrix<double, 5, 5>::Zero();
     SigmaP_muprime = Eigen::Matrix<double, 5, 5>::Zero();
+
+    // PID parameters
     K_p = Eigen::Matrix<double, 5, 5>::Zero();
     K_d = Eigen::Matrix<double, 5, 5>::Zero();
     K_i = Eigen::Matrix<double, 5, 5>::Zero();
 
-    // Begin Tuning parameters of u-AIC
+    // Begin Tuning parameters of u-AIC (Read from ./config/uAIC_tuning.yaml)
     //---------------------------------------------------------------
 
     // Variances associated with the beliefs and the sensory inputs
@@ -119,9 +128,12 @@
     nh.getParam("k_p4", k_p4);
     nh.getParam("k_d", k_d);
     nh.getParam("k_i", k_i);
+    nh.getParam("max_i", max_i);
+
+    // Learning rates for the gradient descent
     nh.getParam("k_mu", k_mu);
     nh.getParam("k_a", k_a);
-    nh.getParam("max_i", max_i);
+    
     I_gain <<  0.02, 0.02, 0.02, 0.02, 0.02;
 
     // Learning rates for the gradient descent (found that a ratio of 60 works good)
@@ -155,6 +167,7 @@
 
     // Integration step
     h = 0.001;
+
     // Resize the data for the published message
     torque_command.data.resize(5);
     beliefs_mu_data.data.resize(5);
@@ -187,10 +200,11 @@
           I_gain(j) = -max_i;
       }
     }
-	//ROS_WARN("Current integral term: %f",I_gain(0));
-        // Calculate and send control actions
+    
+    // Calculate and send control actions
     uAIC::computeActions();
     
+    // Publish beliefs
     for (int i=0;i<5;i++){
     	beliefs_mu_data.data[i] = mu(i);
     	beliefs_mu_p_data.data[i] = mu_p(i);
@@ -200,8 +214,9 @@
     beliefs_mu_p_pub.publish(beliefs_mu_p_data);
   }
 
+  // Compute control actions through gradient descent of F (Basically PID)
   void   uAIC::computeActions(){
-    // Unbiased uAIC
+    // PID controller
     u = K_p*(mu_d-mu) + K_d*(mu_p_d-mu_p) + K_i*(I_gain);
 
     interbotix_xs_msgs::JointGroupCommand a;
@@ -245,10 +260,10 @@
     for(int i=0; i<5; i++){
       mu_d(i) = jointPos(i);
       mu_p_d(i) = 0;
-//      std::cout << jointPos(i) << "\n";
     }
   }
 
+  // function to return the sensory prediction error
   std_msgs::Float64MultiArray  uAIC::getSPE(){
     return(SPE);
   }

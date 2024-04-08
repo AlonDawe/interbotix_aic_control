@@ -59,66 +59,9 @@ int main(int argc, char **argv)
   desiredPos6 = desiredPos1;
   desiredPos6[joint] = -0.6;
 
-  //desiredPos2[0] = 0.8;
-  //desiredPos2[0] = 0.0;
-  //desiredPos2[1] = 0.0;
-  //desiredPos2[2] = 0.0;
-  //desiredPos2[3] = 0.0;
-  //desiredPos2[3] = 0.8;
-  //desiredPos2[4] = 0.0;
-  //desiredPos2[4] = 0.8;
-  
-
-  //desiredPos3[0] = -0.8;
-  //desiredPos3[0] = 0.0;
-  //desiredPos3[1] = 0.0;
-  //desiredPos3[2] = 0.0;
-  //desiredPos3[3] = 0.0;
-  //desiredPos3[3] = -0.8;
-  //desiredPos3[4] = 0.0;
-  //desiredPos3[4] = -0.8;
-  //desiredPos3[5] = 0.0;
-
-  // Complex Step Response
-  //desiredPos3[0] = 0.0;
-  //desiredPos3[0] = 1.6;
-  //desiredPos3[1] = 0.0;
-  //desiredPos3[2] = 0.0;
-  //desiredPos3[3] = 0.0;
-  //desiredPos3[3] = 1.6;
-  //desiredPos3[4] = 0.0;
-  //desiredPos3[4] = 1.6;
-
-  //desiredPos4[0] = 0.0;
-  //desiredPos4[0] = -0.2;
-  //desiredPos4[1] = 0.0;
-  //desiredPos4[2] = 0.0;
-  //desiredPos4[3] = 0.0;
-  //desiredPos4[3] = -0.2;
-  //desiredPos4[4] = 0.0;
-  //desiredPos4[4] = -0.2;
-
-  //desiredPos5[0] = 0.0;
-  //desiredPos5[0] = -0.4;
-  //desiredPos5[1] = 0.0;
-  //desiredPos5[2] = 0.0;
-  //desiredPos5[3] = 0.0;
-  //desiredPos5[3] = -0.4;
-  //desiredPos5[4] = 0.0;
-  //desiredPos5[4] = -0.4;
-
-  //desiredPos6[0] = 0.0;
-  //desiredPos6[0] = -0.6;
-  //desiredPos6[1] = 0.0;
-  //desiredPos6[2] = 0.0;
-  //desiredPos6[3] = 0.0;
-  //desiredPos6[3] = -0.6;
-  //desiredPos6[4] = 0.0;
-  //desiredPos6[4] = -0.6;
-
   // Object of the class AIC which will take care of everything
   AIC AIC_controller(robot);
-  // Set desired position in the AIC class
+  
   ros::Rate rate(1000);
   while (count<1000){
     // Manage all the callbacks and so read sensors
@@ -127,12 +70,12 @@ int main(int argc, char **argv)
     rate.sleep();
   }
 
+  // Set desired position in the AIC class
   AIC_controller.setGoal(desiredPos1);
 
   //ros::Time last_time = ros::Time::now();
 
   // Main loop
-  
   while (ros::ok() && cycles <= 31000){
     // Manage all the callbacks and so read sensors
     ros::spinOnce();
@@ -145,31 +88,31 @@ int main(int argc, char **argv)
       if (cycles < 3000){
         AIC_controller.setGoal(desiredPos1);
       }
-
+      // Step 1
       if (cycles >= 3000 && cycles < 8000){
         AIC_controller.setGoal(desiredPos2);
       }
-
+      // Step 2
       if (cycles >= 8000 && cycles < 13000){
         AIC_controller.setGoal(desiredPos3);
       }
-
+      // Step 3
       if (cycles >= 13000 && cycles < 18000){
         AIC_controller.setGoal(desiredPos1);
       }
-
+      // Step 4
       if (cycles >= 18000 && cycles < 21000){
         AIC_controller.setGoal(desiredPos4);
       }
-
+      // Step 5
       if (cycles >= 21000 && cycles < 24000){
         AIC_controller.setGoal(desiredPos5);
       }
-
+      // Step 6
       if (cycles >= 24000 && cycles < 27000){
         AIC_controller.setGoal(desiredPos6);
       }
-
+      // Step 7
       if (cycles >= 27000 && cycles < 31000){
         AIC_controller.setGoal(desiredPos1);
       }

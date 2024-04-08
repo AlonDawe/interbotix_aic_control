@@ -33,7 +33,7 @@
 #include <interbotix_xs_msgs/JointGroupCommand.h>
 #include <interbotix_xs_msgs/JointSingleCommand.h>
 
-// Class uAIC to hanle the subscribers and the publishers for the active inference controller
+// Class uAIC to hanle the subscribers and the publishers for the uAIC controller
 class uAIC
 {
 public:
@@ -47,7 +47,7 @@ public:
   void initVariables();
   // Main method which minimises the free-energy using gradient descent
   void minimiseF();
-  // Calculate and send the torque commands to compute actions and further minimise the free-energy
+  // Calculate and send the conrol action commands to compute actions and further minimise the free-energy
   void computeActions();
   // Support method to control the program flow. Data ready returns one when the encoders has been read
   int dataReady();
@@ -68,11 +68,11 @@ private:
   Eigen::Matrix<double, 5, 5> SigmaP_yq0, SigmaP_yq1, SigmaP_mu, SigmaP_muprime;
   // Controller parameters, PID like control law. Diagonal matrices
   Eigen::Matrix<double, 5, 5> K_p, K_i, K_d;
-  // Beliefs about the states and their derivatives mu, mu', mu'', column vectors of 7 elements. Temp variables mu_past, mu_p_past to keep track of past time step
+  // Beliefs about the states and their derivatives mu, mu', mu'', column vectors of 5 elements. Temp variables mu_past, mu_p_past to keep track of past time step
   Eigen::Matrix<double, 5, 1> mu, mu_p, mu_pp, mu_dot, mu_dot_p, mu_dot_pp, jointPos, jointVel, mu_past, mu_p_past;
-  // Desired robot's states, column vector of 7 elements
+  // Desired robot's states, column vector of 5 elements
   Eigen::Matrix<double, 5, 1> mu_d, mu_p_d;
-  // Control actions,  column vector of 7 elements, and integral gain
+  // Control actions,  column vector of 5 elements, and integral gain
   Eigen::Matrix<double, 5, 1> u, I_gain;
   // Parameters for control law, to populate the gain matrices
   double  k_p, k_d, k_i, max_i, k_p0, k_p1, k_p2, k_p3, k_p4;
@@ -84,13 +84,13 @@ private:
   int dataReceived;
   // ROS related Variables, node handle
   ros::NodeHandle nh;
-  // Publishers for joint torques to the topics /panda_joint*_controller/command, and the free-energy
+  // Publishers for joint torques to the topics
   ros::Publisher singlePub, groupPub, tauPub1, tauPub2, tauPub3, tauPub4, tauPub5, torque_pub, beliefs_mu_p_pub, beliefs_mu_pub;
-  // Subscriber for proprioceptive sensors (i.e. from joint_states) and camera (i.e. aruco_single/pose)
+  // Subscriber for proprioceptive sensors (i.e. from joint_states)
   ros::Subscriber sensorSub;
-  // Support variables to contain the torques for the joints
+  // Support variables to contain the commands for the joints in gazebo
   std_msgs::Float64 tau1, tau2, tau3, tau4, tau5, tau6, tau7, F;
-  // Values for direct kinematics computation using DH parameters
+  // Values for direct kinematics computation using DH parameters (NOT USED)
   Eigen::Matrix<double, 7, 1> DH_a, DH_d, DH_alpha;
   Eigen::Matrix<double, 4, 4> DH_T, DH_A, T;
   Eigen::Matrix<double, 3, 1> eePosition;

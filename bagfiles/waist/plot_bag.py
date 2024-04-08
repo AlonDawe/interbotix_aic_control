@@ -11,12 +11,13 @@ rcParams['font.serif'] = ['cmr10']
 rcParams['font.size'] = 14
 #rcParams['axes.unicode_minus'] = False
 rcParams['axes.formatter.use_mathtext'] = True
+rcParams['text.usetex'] = True
 
 # Specify the path to your ROS bag file
 #bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/_2023-11-21-14-13-48.bag"
 bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/WAIST_STEP_2023-12-04-11-24-48.bag"
-bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/WAIST_STEP_TRIAL_2024-04-02-19-36-34.bag"
-bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/WAIST_STEP_TRIAL_2024-04-02-19-53-46.bag"
+#bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/WAIST_STEP_TRIAL_2024-04-02-19-36-34.bag"
+#bag_path = "/home/alon/ros_workspaces/interbotix_pincherX_ws/src/interbotix_aic_control/bagfiles/waist/WAIST_STEP_TRIAL_2024-04-02-19-53-46.bag"
 # Open the bag file
 bag = rosbag.Bag(bag_path)
 

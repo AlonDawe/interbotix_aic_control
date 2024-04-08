@@ -15,6 +15,7 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes,  mark_inset
 rcParams['font.family'] = 'serif'
 rcParams['font.serif'] = ['cmr10']
 rcParams['font.size'] = 14
+rcParams['text.usetex'] = True
 #rcParams['axes.unicode_minus'] = False
 rcParams['axes.formatter.use_mathtext'] = True
 #rcParams['font.text', usetex=True]
@@ -762,7 +763,7 @@ ax2.set_ylabel('Control Signal (V)')
 ax2.grid(True)  # Turn on the grid for the first subplot
 ax2.set_xlim(0, 30)
 #fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/Kp3_Ka4_step_response_with_noise_new.pdf')
-#fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/Kp3_Ka4_step_response_new.pdf')
+fig.savefig('/home/alon/Documents/thesis/Tuning Parameter Influences/Kp3_Ka4_step_response_new.pdf')
 
 
 step_x = [1, 2, 3, 4, 5, 6, 7]

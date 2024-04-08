@@ -31,7 +31,7 @@
 #include <interbotix_xs_msgs/JointGroupCommand.h>
 #include <interbotix_xs_msgs/JointSingleCommand.h>
 
-// Class PID to hanle the subscribers and the publishers for the active inference controller
+// Class PID to hanle the subscribers and the publishers for the PID controller
 class PID
 {
 public:
@@ -43,41 +43,40 @@ public:
   void jointStatesCallback(const sensor_msgs::JointState::ConstPtr& msg);
   // Method to set the necessary variables once the constructor is called
   void initVariables();
-  // Calculate and send the torque commands to compute actions and further minimise the free-energy
+  // Calculate and send the control action commands
   void computeActions();
   // Support method to control the program flow. Data ready returns one when the encoders has been read
   int dataReady();
   // Set desired position
   void setGoal(std::vector<double> desiredPos);
-  // get methods for sensory prediction errors
-
+  // function to perfrom impulse response
   void setStep(std::vector<double> controlInput);
 
 private:
 
-  // Variances associated with the active inference controller and the confidence relative to sensory input and beliefs
+  // PID Tunin gparameters
   double k_p, k_d, k_i ;
-  // Precision matrices, diagonal matrices with the inverce of the variance
+  // Diagonal matrices for the tuning parameters
   Eigen::Matrix<double, 5, 5> Kp, Kd, Ki;
-  // Beliefs about the states and their derivatives mu, mu', mu'', column vectors of 7 elements
+  // Column vector for the joint position and velocity
   Eigen::Matrix<double, 5, 1> jointPos, jointVel;
-  // Desired robot's states, column vector of 7 elements
+  // Desired robot's states, column vector of 5 elements
   Eigen::Matrix<double, 5, 1> mu_d, mu_p_d, error, error_p, se;
-  // Control actions,  column vector of 7 elements
+  // Control actions, column vector of 5 elements
   Eigen::Matrix<double, 5, 1> u;
-  // Learning rates and integration step for the PID
+  // Integration step for the PID
   double h;
   // Support variable to control the flow of the script
   int dataReceived;
   // ROS related Variables, node handle
   ros::NodeHandle nh;
-  // Publishers for joint torques to the topics /panda_joint*_controller/command, and the free-energy
+  // Publishers for joint commands to the topics
   ros::Publisher singlePub, groupPub, tauPub1, tauPub2, tauPub3, tauPub4, tauPub5, tauPub6, tauPub7, mu_desired_pub;
-  // Subscriber for proprioceptive sensors (i.e. from joint_states) and camera (i.e. aruco_single/pose)
+  // Subscriber for proprioceptive sensors (i.e. from joint_states)
   ros::Subscriber sensorSub;
-  // Support variables to contain the torques for the joints
+  // Support variables to contain the torques for the joints in gazebo
   std_msgs::Float64 tau1, tau2, tau3, tau4, tau5, tau6, tau7;
-
+  // Definition of variables in order to publish the goal state
   std_msgs::Float64MultiArray mu_des;
 
 };

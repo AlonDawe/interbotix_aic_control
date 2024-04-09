@@ -5,7 +5,7 @@ This repository contains code focused on enhancing the Active Inference Controll
 The code within this repository was adapted from the [THIS GitHub repository](https://github.com/cpezzato/panda_simulation/tree/master), in which the author implemented an AIC controller to control a 7-DOF Franka Emika Panda robot arm for their study [^1]. The code was changed to suit the control of a real 5-DOF Interbotix PincherX 150 robotic manipulator with different control algorithms. 
 
 <div align="center">
-  <img src="./images/Interbotix_Pincher.png" alt="Interbotix PincherX 150, 5-DOF Manipulator">
+  <img src="./images/Interbotix_PincherX_150_labelled.png" alt="Interbotix PincherX 150, 5-DOF Manipulator">
 </div>
 <div align="center">
   <em>Interbotix PincherX 150</em>
